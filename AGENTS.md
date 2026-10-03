@@ -55,7 +55,7 @@ When two instructions at the same level conflict, name the conflict and ask; do 
 | Full | The required CI check `check` passing on the pushed head (`gh pr checks <number> --watch`) |
 | QA | `uv run python -m eval`, then open and read `eval/report.md` and the per-set CSVs |
 
-Today the CI job `check` only runs `git diff --check`. Issue #1 adds the Python project and extends `check` to run the fast gate, and issue #17 adds the evaluation harness; update this table in the same PR if either command ends up different. Until a gate exists, report it as `NOT RUN` with that reason, never as passed.
+Issue #17 adds the evaluation harness; update this table in the same PR if its command ends up different. Until a gate exists, report it as `NOT RUN` with that reason, never as passed.
 
 The QA gate is required for any change to prompts, retrieval or τ, the danger-sign lists, the intent classifier, OCR extraction, the medicine lexicon, critical lab values or the evaluation sets.
 
