@@ -43,6 +43,12 @@ Commit subjects and PR titles follow [Conventional Commits](https://www.conventi
 
 ## 5. Verify
 
+Set up once with `uv sync`, then run the fast gate, the same checks CI runs:
+
+```bash
+uv run ruff check . && uv run ruff format --check . && uv run ty check && uv run pytest
+```
+
 Run the verification for the change's class from [AGENTS.md](AGENTS.md#verification), then `git diff --check`, and read the final diff and commit list against the merge base. If `origin/main` has moved, rebase onto it and rerun the gates.
 
 ## 6. Open the PR
