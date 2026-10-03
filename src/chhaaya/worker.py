@@ -2,11 +2,14 @@ import logging
 import signal
 import threading
 
+from chhaaya.settings import Settings
+
 log = logging.getLogger("chhaaya.worker")
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
+    Settings()
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: stop.set())
