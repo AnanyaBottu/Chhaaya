@@ -4,6 +4,7 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from sqlalchemy import Engine, text
 
 from chhaaya.app import app
@@ -151,4 +152,22 @@ def test_missing_or_wrong_signature_is_rejected_and_nothing_is_stored(
         headers={"X-Hub-Signature-256": f"sha256={signature}"},
     )
     assert forged.status_code == 403
+    garbage = client.post(
+        "/webhook", content=body, headers={b"X-Hub-Signature-256": "sha256=é".encode()}
+    )
+    assert garbage.status_code == 403
     assert stored(engine) == []
+
+
+def test_a_blank_app_secret_is_refused_at_startup():
+    # An empty HMAC key is public knowledge, so signatures would prove nothing.
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            postgres_password="unused",
+            database_url="postgresql://unused",
+            whatsapp_verify_token=VERIFY_TOKEN,
+            whatsapp_app_secret="",
+            whatsapp_access_token="unused",
+            whatsapp_phone_number_id="unused",
+        )

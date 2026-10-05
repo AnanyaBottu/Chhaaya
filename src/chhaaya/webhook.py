@@ -38,7 +38,7 @@ def verify(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> str:
     if mode != "subscribe" or not hmac.compare_digest(
-        token, settings.whatsapp_verify_token
+        token.encode(), settings.whatsapp_verify_token.encode()
     ):
         raise HTTPException(403, "verification failed")
     return challenge
@@ -55,7 +55,7 @@ async def receive(
         settings.whatsapp_app_secret.encode(), body, hashlib.sha256
     ).hexdigest()
     signature = request.headers.get("X-Hub-Signature-256", "")
-    if not hmac.compare_digest(signature, f"sha256={expected}"):
+    if not hmac.compare_digest(signature.encode(), f"sha256={expected}".encode()):
         raise HTTPException(403, "invalid signature")
     await run_in_threadpool(store, engine, json.loads(body))
     return {"status": "ok"}
