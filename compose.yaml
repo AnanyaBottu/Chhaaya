@@ -31,6 +31,10 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://localhost:8000/health')"]
+      interval: 2s
+      retries: 15
     depends_on:
       migrate:
         condition: service_completed_successfully
