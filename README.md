@@ -16,10 +16,10 @@ Questions are answered by retrieving passages from MoHFW, ICMR and NHM documents
 
 ## Running it locally
 
-`docker compose up` starts the app, the worker and Postgres 16 with pgvector. Settings come from environment variables; `.env.example` lists them all. `GET /health` on port 8000 answers `{"status": "ok"}` once the app is up.
+`docker compose up` starts the app, the worker and Postgres 16 with pgvector. Settings come from environment variables; `.env.example` lists them all. The service refuses to start with a blank `WHATSAPP_*` value; without a Meta app, any non-blank placeholders work locally, but never deploy with guessable ones. `GET /health` on port 8000 answers `{"status": "ok"}` once the app is up.
 
 ```bash
-cp .env.example .env   # then set POSTGRES_PASSWORD
+cp .env.example .env   # then set POSTGRES_PASSWORD and the WHATSAPP_* values
 docker compose up --build
 curl localhost:8000/health
 ```
