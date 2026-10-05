@@ -48,7 +48,7 @@ services:
 
   # Optional: `docker compose --profile tunnel up` exposes the app to Meta.
   tunnel:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.9.3
     profiles: [tunnel]
     command: ["tunnel", "--no-autoupdate", "run"]
     environment:
