@@ -75,6 +75,10 @@ def test_normalises_case_unicode_and_spelling(text, sign):
         ("pregnancy ke saatve mahine mein khoon aa raha", "bleeding_in_pregnancy"),
         ("I'm pregnant. Since last night, bleeding", "bleeding_in_pregnancy"),
         ("bachcha doodh bilkul nahi pee raha", "not_feeding"),
+        (
+            "pregnancy mein khoon dekha, haan wahi khoon bahut zyada tez aa raha hai",
+            "bleeding_in_pregnancy",
+        ),
         ("pregnancy mein bleeding nahi ruk rahi", "bleeding_in_pregnancy"),
     ],
 )

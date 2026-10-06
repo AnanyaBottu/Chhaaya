@@ -9,6 +9,7 @@ handled in _negated; anything else fires.
 
 import re
 import unicodedata
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -85,8 +86,14 @@ def _tokens(text: str) -> list[str]:
     return [_BOUNDARY if t in _CLAUSE_WORDS else t for t in tokens]
 
 
-def _phrase_tokens(phrase: str) -> list[str]:
-    return [t for t in _tokens(phrase) if t != _BOUNDARY]
+def _phrase_words(phrase: str) -> list[set[str]]:
+    """Split a phrasing into words; "aa/aaya" matches either form."""
+    words = [
+        {t for form in word.split("/") for t in _tokens(form) if t != _BOUNDARY}
+        for word in phrase.split()
+    ]
+    # Clause words ("and", "par") are boundaries in text, so drop them here.
+    return [word for word in words if word]
 
 
 def _canonical_set(words: set[str]) -> set[str]:
@@ -98,32 +105,26 @@ _HI_NEG = _canonical_set(_HINDI_NEGATORS)
 _DENIAL = _canonical_set(_DENIAL_VERBS)
 
 
-def _matches(tokens: list[str], phrase: list[str]) -> list[tuple[int, int, set[int]]]:
-    """Return (first, last, positions) for each occurrence of phrase."""
-    found = []
-    for start, token in enumerate(tokens):
-        if token != phrase[0]:
-            continue
-        positions = {start}
-        at = start
-        for word in phrase[1:]:
-            gap = 0
-            at += 1
-            while at < len(tokens) and tokens[at] != word:
-                if tokens[at] != _BOUNDARY:
-                    gap += 1
-                if gap > MAX_GAP:
-                    break
-                at += 1
-            if at >= len(tokens) or tokens[at] != word:
-                break
-            positions.add(at)
-        else:
-            found.append((start, at, positions))
-    return found
+def _matches(
+    tokens: list[str], phrase: list[set[str]], start: int = 0
+) -> Iterator[list[int]]:
+    """Yield the token positions of each occurrence of phrase from start on."""
+    gap = 0
+    for at in range(start, len(tokens)):
+        if tokens[at] in phrase[0]:
+            if len(phrase) == 1:
+                yield [at]
+            else:
+                for rest in _matches(tokens, phrase[1:], at + 1):
+                    yield [at, *rest]
+        if start and tokens[at] != _BOUNDARY:
+            gap += 1
+            if gap > MAX_GAP:
+                return
 
 
-def _negated(tokens: list[str], first: int, last: int, positions: set[int]) -> bool:
+def _negated(tokens: list[str], positions: list[int]) -> bool:
+    first, last = positions[0], positions[-1]
     # A negator between the phrase's words negates it only within one clause:
     # "khoon nahi aa raha", but not "khoon, tabiyat theek nahi, aa raha".
     clause_negated = False
@@ -153,9 +154,9 @@ def detect(text: str) -> list[str]:
         sign.id
         for sign, phrases in _COMPILED
         if any(
-            not _negated(tokens, first, last, positions)
+            not _negated(tokens, positions)
             for phrase in phrases
-            for first, last, positions in _matches(tokens, phrase)
+            for positions in _matches(tokens, phrase)
         )
     )
 
@@ -171,6 +172,6 @@ def _load() -> tuple[list[DangerSign], dict[str, str]]:
 
 SIGNS, URGENT_REPLY = _load()
 _COMPILED = [
-    (sign, [_phrase_tokens(p) for ps in sign.phrases.values() for p in ps])
+    (sign, [_phrase_words(p) for ps in sign.phrases.values() for p in ps])
     for sign in SIGNS
 ]
