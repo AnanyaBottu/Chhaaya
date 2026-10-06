@@ -1,8 +1,18 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-from chhaaya.webhook import router
+from chhaaya.webhook import get_settings, router
 
-app = FastAPI(title="Chhaaya")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    get_settings()
+    yield
+
+
+app = FastAPI(title="Chhaaya", lifespan=lifespan)
 app.include_router(router)
 
 
