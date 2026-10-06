@@ -9,7 +9,8 @@
 #   https://nhm.gov.in/images/pdf/communitisation/asha/book-no-6.pdf
 # Phrasings are matched after normalisation (case, Unicode, common Hinglish
 # spelling variants), in order, with up to six other words between
-# neighbouring words; see src/chhaaya/danger_signs.py.
+# neighbouring words; "aa/aaya" accepts either form. See
+# src/chhaaya/danger_signs.py.
 
 urgent_reply:
   en: >-
@@ -34,25 +35,25 @@ signs:
         - bleeding during pregnancy
         - pregnancy bleeding
       hi:
-        - गर्भावस्था में खून आ
+        - गर्भावस्था में खून आ/आया/आयी/आई/आए/आये/आता/आती/आते
         - गर्भावस्था में खून आना
-        - गर्भावस्था में खून बह
+        - गर्भावस्था में खून बह/बहा/बही/बहता/बहती
         - गर्भावस्था में रक्तस्राव
-        - गर्भावस्था में खून नहीं रुक
-        - गर्भवती खून आ
-        - गर्भवती खून बह
-        - गर्भ में खून आ
+        - गर्भावस्था में खून नहीं रुक/रुका/रुकी/रुकता/रुकती
+        - गर्भवती खून आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - गर्भवती खून बह/बहा/बही/बहता/बहती
+        - गर्भ में खून आ/आया/आयी/आई/आए/आये/आता/आती/आते
       hi-Latn:
-        - pregnancy khoon aa
-        - pregnancy khoon beh
-        - pregnancy khoon gir
-        - pregnancy khoon nikal
-        - pregnancy khoon nahi ruk
+        - pregnancy khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - pregnancy khoon beh/beha/behta/behti/bah/baha/bahta/bahti
+        - pregnancy khoon gir/gira/giri/girta/girti
+        - pregnancy khoon nikal/nikla/nikli/nikalta/nikalti
+        - pregnancy khoon nahi ruk/ruka/ruki/rukta/rukti
         - pregnancy bleeding
-        - pregnant khoon aa
-        - pregnant khoon beh
-        - pet se khoon aa
-        - garbh khoon aa
+        - pregnant khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - pregnant khoon beh/beha/behta/behti/bah/baha/bahta/bahti
+        - pet se khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - garbh khoon aa/aaya/aayi/aaye/aata/aati/aate
 
   - id: bleeding_after_delivery
     source: MCP Card 2018 (MoHFW), p. 6
@@ -68,11 +69,11 @@ signs:
         - प्रसव के बाद खून बंद नहीं
       hi-Latn:
         - delivery ke baad bahut khoon
-        - delivery ke baad khoon aa
-        - delivery ke baad khoon beh
-        - delivery ke baad khoon nahi ruk
+        - delivery ke baad khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - delivery ke baad khoon beh/beha/behta/behti/bah/baha/bahta/bahti
+        - delivery ke baad khoon nahi ruk/ruka/ruki/rukta/rukti
         - delivery ke baad bleeding
-        - bachcha hone ke baad khoon aa
+        - bachcha hone ke baad khoon aa/aaya/aayi/aaye/aata/aati/aate
         - bachcha hone ke baad bahut khoon
 
   - id: convulsions
@@ -89,21 +90,21 @@ signs:
         - having fits
         - fits
       hi:
-        - दौरा पड़
-        - दौरे पड़
-        - दौरा आ
-        - दौरे आ
-        - झटके आ
-        - झटके लग
+        - दौरा पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+        - दौरे पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+        - दौरा आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - दौरे आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - झटके आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - झटके लग/लगा/लगी/लगे/लगता/लगती/लगते
         - मिर्गी
       hi-Latn:
-        - daura pad
-        - daure pad
-        - daura aa
-        - daure aa
-        - jhatke aa
-        - jhatke lag
-        - jhatka aa
+        - daura pad/pada/padi/pade/padta/padti/padte
+        - daure pad/pada/padi/pade/padta/padti/padte
+        - daura aa/aaya/aayi/aaye/aata/aati/aate
+        - daure aa/aaya/aayi/aaye/aata/aati/aate
+        - jhatke aa/aaya/aayi/aaye/aata/aati/aate
+        - jhatke lag/laga/lagi/lage/lagta/lagti/lagte
+        - jhatka aa/aaya/aayi/aaye/aata/aati/aate
         - mirgi
 
   - id: not_feeding
@@ -111,6 +112,8 @@ signs:
     phrases:
       en:
         - not feeding
+        - not feed/feeds
+        - not taking milk/feed/feeds
         - not breastfeeding
         - not sucking
         - unable to feed
@@ -121,18 +124,20 @@ signs:
         - not drinking milk
         - stopped feeding
       hi:
-        - दूध नहीं पी
+        - दूध नहीं पी/पिया/पीता/पीती/पीते
+        - दूध पी/पिया/पीता/पीती/पीते नहीं
         - दूध नहीं पीता
         - दूध नहीं पीती
         - स्तनपान नहीं
-        - कुछ नहीं पी पा
+        - कुछ नहीं पी/पिया/पीता/पीती/पीते पा
         - दूध नहीं चूस
       hi-Latn:
-        - doodh nahi pee
+        - doodh nahi pee/piya/peeta/peeti/peete
+        - doodh pee/piya/peeta/peeti/peete nahi
         - doodh nahi peeta
         - doodh nahi peeti
         - doodh nahi kheench
-        - kuch nahi pee pa
+        - kuch nahi pee/piya/peeta/peeti/peete pa
         - feed nahi kar
 
   - id: difficulty_breathing
@@ -164,7 +169,7 @@ signs:
         - saans phool
         - saans tez
         - saans nahi le
-        - saans nahi aa
+        - saans nahi aa/aaya/aayi/aaye/aata/aati/aate
         - chhati andar dhans
 
   - id: unconscious
@@ -182,13 +187,13 @@ signs:
         - बेहोश
         - होश नहीं
         - जाग नहीं
-        - सुस्त पड़
+        - सुस्त पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
       hi-Latn:
         - behosh
         - hosh nahi
         - jaag nahi
         - uth nahi raha
-        - sust pad
+        - sust pad/pada/padi/pade/padta/padti/padte
 
   - id: severe_headache_blurred_vision
     source: ASHA Module 6 (NHM), p. 30; MCP Card 2018 (MoHFW), p. 6
@@ -240,7 +245,7 @@ signs:
         - बच्चे की हलचल बंद
         - बच्चा हिलना बंद
       hi-Latn:
-        - bachcha hil nahi
+        - bachcha hil/hila/hilta/hilti nahi
         - bachche ki halchal kam
         - bachche ki halchal band
         - bachcha hilna band
@@ -327,12 +332,12 @@ signs:
         - cold to touch
         - body is cold
       hi:
-        - बच्चा ठंडा पड़
-        - शरीर ठंडा पड़
+        - बच्चा ठंडा पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+        - शरीर ठंडा पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
       hi-Latn:
-        - bachcha thanda pad
-        - baby thanda pad
-        - sharir thanda pad
+        - bachcha thanda pad/pada/padi/pade/padta/padti/padte
+        - baby thanda pad/pada/padi/pade/padta/padti/padte
+        - sharir thanda pad/pada/padi/pade/padta/padti/padte
 
   - id: jaundice
     source: IMNCI Chart Booklet (MoHFW), p. 1

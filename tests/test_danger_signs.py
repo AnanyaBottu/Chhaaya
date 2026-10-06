@@ -44,6 +44,16 @@ LANGUAGES = {"en", "hi", "hi-Latn"}
         ("delivery ke baad bahut khoon beh raha hai", "bleeding_after_delivery"),
         ("bacche ki hatheli aur talve peele hain", "jaundice"),
         ("baby is vomiting everything she eats", "vomits_everything"),
+        ("bachcha doodh pi nahi raha", "not_feeding"),
+        ("बच्चा दूध पी नहीं रहा", "not_feeding"),
+        ("bacha dudh pee nahi rha hai", "not_feeding"),
+        ("baby does not feed", "not_feeding"),
+        ("baby is not taking milk", "not_feeding"),
+        ("jhatke aaye", "convulsions"),
+        ("baby ko jhatke aate hain", "convulsions"),
+        ("usko daura pada", "convulsions"),
+        ("pregnancy mein khoon aaya", "bleeding_in_pregnancy"),
+        ("गर्भावस्था में खून आया", "bleeding_in_pregnancy"),
     ],
 )
 def test_detects_sign_in_each_language(text, sign):
