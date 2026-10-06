@@ -8,7 +8,7 @@
 # ASHA Module 6: Skills that Save Lives, Focus on Maternal and Newborn Health, NRHM.
 #   https://nhm.gov.in/images/pdf/communitisation/asha/book-no-6.pdf
 # Phrasings are matched after normalisation (case, Unicode, common Hinglish
-# spelling variants), in order, with up to four other words between
+# spelling variants), in order, with up to six other words between
 # neighbouring words; see src/chhaaya/danger_signs.py.
 
 urgent_reply:

@@ -17,7 +17,7 @@ import yaml
 DATA = Path(__file__).resolve().parents[2] / "data" / "danger_signs.yaml"
 LANGUAGES = ("en", "hi", "hi-Latn")
 
-MAX_GAP = 4
+MAX_GAP = 6
 # English negators scope forward over this many words: "no heavy bleeding".
 NEGATION_WINDOW = 3
 
@@ -124,9 +124,17 @@ def _matches(tokens: list[str], phrase: list[str]) -> list[tuple[int, int, set[i
 
 
 def _negated(tokens: list[str], first: int, last: int, positions: set[int]) -> bool:
-    between = [tokens[i] for i in range(first, last + 1) if i not in positions]
-    if any(t in _EN_NEG or t in _HI_NEG for t in between):
-        return True
+    # A negator between the phrase's words negates it only within one clause:
+    # "khoon nahi aa raha", but not "khoon, tabiyat theek nahi, aa raha".
+    clause_negated = False
+    for i in range(first, last + 1):
+        if tokens[i] == _BOUNDARY:
+            clause_negated = False
+        elif i in positions:
+            if clause_negated:
+                return True
+        elif tokens[i] in _EN_NEG or tokens[i] in _HI_NEG:
+            clause_negated = True
     before = []
     for t in reversed(tokens[max(0, first - NEGATION_WINDOW) : first]):
         if t == _BOUNDARY:
