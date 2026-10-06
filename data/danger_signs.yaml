@@ -1,0 +1,425 @@
+# Danger signs (design section 6). Every sign cites the page it comes from;
+# page numbers are the ones printed on the page.
+#
+# MCP Card 2018: Mother and Child Protection Card, MoHFW and MoWCD, 2018.
+#   https://nhm.gov.in/New-Update-2022-24/CH-Programmes/HBNC-&-HBYC-Resource-%20Material/Revised-India-MCP-Card-English-(28-05-2018).pdf
+# IMNCI Chart Booklet: Facility Based IMNCI Chart Booklet, MoHFW with WHO and UNICEF.
+#   https://nhm.gov.in/images/pdf/programmes/child-health/guidelines/imnci_chart_booklet.pdf
+# ASHA Module 6: Skills that Save Lives, Focus on Maternal and Newborn Health, NRHM.
+#   https://nhm.gov.in/images/pdf/communitisation/asha/book-no-6.pdf
+# Phrasings are matched after normalisation (case, Unicode, common Hinglish
+# spelling variants), in order, with up to six other words between
+# neighbouring words; "aa/aaya" accepts either form. See
+# src/chhaaya/danger_signs.py.
+
+urgent_reply:
+  en: >-
+    This could be serious. Please go to the nearest health centre now, or call
+    108 for a free ambulance. We have also told your ASHA.
+  hi: >-
+    यह गंभीर हो सकता है। कृपया अभी नज़दीकी स्वास्थ्य केंद्र जाएँ, या मुफ़्त
+    एम्बुलेंस के लिए 108 पर कॉल करें। हमने आपकी आशा दीदी को भी बता दिया है।
+  hi-Latn: >-
+    Yeh gambhir ho sakta hai. Kripya abhi nazdeeki swasthya kendra jaayein, ya
+    muft ambulance ke liye 108 par call karein. Humne aapki ASHA didi ko bhi
+    bata diya hai.
+
+signs:
+  - id: bleeding_in_pregnancy
+    source: MCP Card 2018 (MoHFW), p. 6
+    phrases:
+      en:
+        - pregnant bleeding
+        - bleeding pregnant
+        - bleeding in pregnancy
+        - bleeding during pregnancy
+        - pregnancy bleeding
+      hi:
+        - गर्भावस्था में खून आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - गर्भावस्था में खून आना
+        - गर्भावस्था में खून बह/बहा/बही/बहता/बहती
+        - गर्भावस्था में रक्तस्राव
+        - गर्भावस्था में खून नहीं रुक/रुका/रुकी/रुकता/रुकती
+        - गर्भवती खून आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - गर्भवती खून बह/बहा/बही/बहता/बहती
+        - गर्भ में खून आ/आया/आयी/आई/आए/आये/आता/आती/आते
+      hi-Latn:
+        - pregnancy khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - pregnancy khoon beh/beha/behta/behti/bah/baha/bahta/bahti
+        - pregnancy khoon gir/gira/giri/girta/girti
+        - pregnancy khoon nikal/nikla/nikli/nikalta/nikalti
+        - pregnancy khoon nahi ruk/ruka/ruki/rukta/rukti
+        - pregnancy bleeding
+        - pregnant khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - pregnant khoon beh/beha/behta/behti/bah/baha/bahta/bahti
+        - pet se khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - garbh khoon aa/aaya/aayi/aaye/aata/aati/aate
+
+  - id: bleeding_after_delivery
+    source: MCP Card 2018 (MoHFW), p. 6
+    phrases:
+      en:
+        - heavy bleeding after delivery
+        - bleeding after delivery
+        - bleeding after childbirth
+        - delivery bleeding a lot
+      hi:
+        - प्रसव के बाद बहुत खून
+        - डिलीवरी के बाद बहुत खून
+        - प्रसव के बाद खून बंद नहीं
+      hi-Latn:
+        - delivery ke baad bahut khoon
+        - delivery ke baad khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - delivery ke baad khoon beh/beha/behta/behti/bah/baha/bahta/bahti
+        - delivery ke baad khoon nahi ruk/ruka/ruki/rukta/rukti
+        - delivery ke baad bleeding
+        - bachcha hone ke baad khoon aa/aaya/aayi/aaye/aata/aati/aate
+        - bachcha hone ke baad bahut khoon
+
+  - id: convulsions
+    source: MCP Card 2018 (MoHFW), p. 6; IMNCI Chart Booklet (MoHFW), p. 1 (newborn) and p. 12 (child)
+    phrases:
+      en:
+        - convulsion
+        - convulsions
+        - convulsing
+        - seizure
+        - seizures
+        - had a fit
+        - having a fit
+        - having fits
+        - fits
+      hi:
+        - दौरा पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+        - दौरे पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+        - दौरा आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - दौरे आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - झटके आ/आया/आयी/आई/आए/आये/आता/आती/आते
+        - झटके लग/लगा/लगी/लगे/लगता/लगती/लगते
+        - मिर्गी
+      hi-Latn:
+        - daura pad/pada/padi/pade/padta/padti/padte
+        - daure pad/pada/padi/pade/padta/padti/padte
+        - daura aa/aaya/aayi/aaye/aata/aati/aate
+        - daure aa/aaya/aayi/aaye/aata/aati/aate
+        - jhatke aa/aaya/aayi/aaye/aata/aati/aate
+        - jhatke lag/laga/lagi/lage/lagta/lagti/lagte
+        - jhatka aa/aaya/aayi/aaye/aata/aati/aate
+        - mirgi
+
+  - id: not_feeding
+    source: IMNCI Chart Booklet (MoHFW), p. 3 (newborn) and p. 12 (child)
+    phrases:
+      en:
+        - not feeding
+        - not feed/feeds
+        - not taking milk/feed/feeds
+        - not breastfeeding
+        - not sucking
+        - unable to feed
+        - unable to drink
+        - cannot drink
+        - cant drink
+        - not able to drink
+        - not drinking milk
+        - stopped feeding
+      hi:
+        - दूध नहीं पी/पिया/पीता/पीती/पीते
+        - दूध पी/पिया/पीता/पीती/पीते नहीं
+        - दूध नहीं पीता
+        - दूध नहीं पीती
+        - स्तनपान नहीं
+        - कुछ नहीं पी/पिया/पीता/पीती/पीते पा
+        - दूध नहीं चूस
+      hi-Latn:
+        - doodh nahi pee/piya/peeta/peeti/peete
+        - doodh pee/piya/peeta/peeti/peete nahi
+        - doodh nahi peeta
+        - doodh nahi peeti
+        - doodh nahi kheench
+        - kuch nahi pee/piya/peeta/peeti/peete pa
+        - feed nahi kar
+
+  - id: difficulty_breathing
+    source: IMNCI Chart Booklet (MoHFW), p. 1 (newborn) and p. 12 (child)
+    phrases:
+      en:
+        - difficulty breathing
+        - difficult to breathe
+        - trouble breathing
+        - cant breathe
+        - cannot breathe
+        - not breathing
+        - breathing fast
+        - fast breathing
+        - breathless
+        - short of breath
+        - chest indrawing
+        - chest is pulling in
+      hi:
+        - सांस लेने में तकलीफ
+        - सांस लेने में दिक्कत
+        - सांस फूल
+        - सांस तेज़
+        - सांस नहीं ले
+        - छाती अंदर धंस
+      hi-Latn:
+        - saans lene mein dikkat
+        - saans lene mein takleef
+        - saans phool
+        - saans tez
+        - saans nahi le
+        - saans nahi aa/aaya/aayi/aaye/aata/aati/aate
+        - chhati andar dhans
+
+  - id: unconscious
+    source: IMNCI Chart Booklet (MoHFW), p. 1 and p. 12; ASHA Module 6 (NHM), p. 66
+    phrases:
+      en:
+        - unconscious
+        - fainted
+        - not waking up
+        - cannot be woken
+        - not responding
+        - very drowsy
+        - lethargic
+      hi:
+        - बेहोश
+        - होश नहीं
+        - जाग नहीं
+        - सुस्त पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+      hi-Latn:
+        - behosh
+        - hosh nahi
+        - jaag nahi
+        - uth nahi raha
+        - sust pad/pada/padi/pade/padta/padti/padte
+
+  - id: severe_headache_blurred_vision
+    source: ASHA Module 6 (NHM), p. 30; MCP Card 2018 (MoHFW), p. 6
+    phrases:
+      en:
+        - severe headache blurred vision
+        - headache blurred vision
+        - blurred vision
+        - blurry vision
+      hi:
+        - तेज़ सिरदर्द धुंधला
+        - धुंधला दिख
+        - आँखों के आगे अंधेरा
+      hi-Latn:
+        - sir dard dhundhla
+        - dhundhla dikh
+        - aankhon ke aage andhera
+
+  - id: severe_abdominal_pain
+    source: ASHA Module 6 (NHM), p. 30
+    phrases:
+      en:
+        - severe abdominal pain
+        - severe stomach pain
+        - severe pain in abdomen
+        - severe pain in stomach
+      hi:
+        - पेट में बहुत तेज़ दर्द
+        - पेट में तेज़ दर्द
+        - पेट में बहुत दर्द
+      hi-Latn:
+        - pet tez dard
+        - pet bahut dard
+        - pet mein bahut tez dard
+
+  - id: reduced_fetal_movement
+    source: MCP Card 2018 (MoHFW), p. 6; ASHA Module 6 (NHM), p. 30
+    phrases:
+      en:
+        - baby not moving
+        - baby stopped moving
+        - baby movements less
+        - baby moving less
+        - no fetal movement
+        - reduced fetal movement
+      hi:
+        - बच्चा पेट में हिल नहीं
+        - बच्चे की हलचल कम
+        - बच्चे की हलचल बंद
+        - बच्चा हिलना बंद
+      hi-Latn:
+        - bachcha hil/hila/hilta/hilti nahi
+        - bachche ki halchal kam
+        - bachche ki halchal band
+        - bachcha hilna band
+        - baby move nahi
+
+  - id: waters_leaking
+    source: MCP Card 2018 (MoHFW), p. 6
+    phrases:
+      en:
+        - water breaking
+        - waters broke
+        - water broke
+        - leaking water
+        - water leaking
+        - fluid leaking from vagina
+      hi:
+        - नीचे से पानी
+        - पानी की थैली फट
+      hi-Latn:
+        - neeche se paani
+        - paani ki thaili phat
+        - pani leak
+
+  - id: swelling_face_hands
+    source: ASHA Module 6 (NHM), p. 31; MCP Card 2018 (MoHFW), p. 6
+    phrases:
+      en:
+        - swelling of face
+        - swelling of hands
+        - face swollen
+        - hands swollen
+        - swollen face
+        - swollen hands
+      hi:
+        - चेहरे पर सूजन
+        - हाथों में सूजन
+        - चेहरा सूज
+        - हाथ सूज
+      hi-Latn:
+        - chehre par sujan
+        - chehra sooj
+        - haath sooj
+        - haathon mein sujan
+
+  - id: fever
+    source: MCP Card 2018 (MoHFW), p. 6; IMNCI Chart Booklet (MoHFW), p. 1 (newborn)
+    phrases:
+      en:
+        - high fever
+        - very high fever
+        - fever after delivery
+        - fever in pregnancy
+      hi:
+        - तेज़ बुखार
+        - बहुत बुखार
+        - प्रसव के बाद बुखार
+      hi-Latn:
+        - tez bukhar
+        - bahut bukhar
+        - delivery ke baad bukhar
+
+  - id: foul_discharge_after_delivery
+    source: ASHA Module 6 (NHM), p. 39
+    phrases:
+      en:
+        - foul smelling discharge
+        - smelly discharge
+        - bad smell discharge
+      hi:
+        - बदबूदार पानी
+        - बदबूदार स्राव
+        - बदबू वाला पानी
+      hi-Latn:
+        - badboodar paani
+        - badbu wala paani
+        - badbu wala discharge
+
+  - id: newborn_cold
+    source: IMNCI Chart Booklet (MoHFW), p. 1
+    phrases:
+      en:
+        - baby is cold
+        - baby feels cold
+        - cold to touch
+        - body is cold
+      hi:
+        - बच्चा ठंडा पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+        - शरीर ठंडा पड़/पड़ा/पड़ी/पड़े/पड़ता/पड़ती/पड़ते
+      hi-Latn:
+        - bachcha thanda pad/pada/padi/pade/padta/padti/padte
+        - baby thanda pad/pada/padi/pade/padta/padti/padte
+        - sharir thanda pad/pada/padi/pade/padta/padti/padte
+
+  - id: jaundice
+    source: IMNCI Chart Booklet (MoHFW), p. 1
+    phrases:
+      en:
+        - yellow palms
+        - yellow soles
+        - palms are yellow
+        - soles are yellow
+      hi:
+        - हथेली पीली
+        - हथेलियाँ पीली
+        - तलवे पीले
+      hi-Latn:
+        - hatheli peeli
+        - hatheli talve peele
+        - talve peele
+
+  - id: umbilical_infection
+    source: IMNCI Chart Booklet (MoHFW), p. 1
+    phrases:
+      en:
+        - pus from navel
+        - pus in navel
+        - navel red
+        - umbilical pus
+        - umbilicus red
+      hi:
+        - नाभि से मवाद
+        - नाभि लाल
+        - नाल से मवाद
+      hi-Latn:
+        - naabhi se mawad
+        - naabhi laal
+        - naal se mawad
+
+  - id: vomits_everything
+    source: IMNCI Chart Booklet (MoHFW), p. 12
+    phrases:
+      en:
+        - vomiting everything
+        - vomits everything
+        - vomits all
+        - cannot keep anything down
+      hi:
+        - सब कुछ उल्टी
+        - जो खाता है उल्टी
+        - जो पीता है उल्टी
+      hi-Latn:
+        - sab kuch ulti
+        - jo khata ulti
+        - jo peeta ulti
+
+  - id: blood_in_stool
+    source: IMNCI Chart Booklet (MoHFW), p. 13
+    phrases:
+      en:
+        - blood in stool
+        - blood in stools
+        - bloody stool
+        - bloody diarrhoea
+        - bloody diarrhea
+      hi:
+        - मल में खून
+        - दस्त में खून
+        - पॉटी में खून
+      hi-Latn:
+        - potty mein khoon
+        - dast mein khoon
+        - tatti mein khoon
+        - motion mein khoon
+
+  - id: severe_dehydration
+    source: IMNCI Chart Booklet (MoHFW), p. 13
+    phrases:
+      en:
+        - sunken eyes
+        - eyes sunken
+        - skin pinch goes back slowly
+      hi:
+        - आँखें धंस
+        - आंखें अंदर धंस
+      hi-Latn:
+        - aankhen dhans
+        - aankhein andar dhans
