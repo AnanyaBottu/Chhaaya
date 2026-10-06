@@ -18,7 +18,7 @@ def test_compose_migrates_with_reserved_password_and_generates_on_host(tmp_path:
         "alembic.ini",
     ):
         shutil.copy2(root / name, tmp_path / name)
-    for name in ("src", "migrations"):
+    for name in ("src", "data", "migrations"):
         shutil.copytree(root / name, tmp_path / name)
 
     # Synthetic credentials exercise both URL delimiters and literal percent escapes.
