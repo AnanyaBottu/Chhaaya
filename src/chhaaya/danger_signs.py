@@ -23,8 +23,8 @@ NEGATION_WINDOW = 3
 
 # A clause boundary: punctuation, or a word that starts a new clause.
 _BOUNDARY = "|"
-_PUNCTUATION = re.compile(r"[.,!?;:()\[\]\"/\n।॥]")
-_TOKEN = re.compile(r"[0-9a-zऀ-ॣ०-ॿ]+|\|")
+_PUNCTUATION = re.compile(r"[.,!?;:()\[\]\"/\n\u0964\u0965]")
+_TOKEN = re.compile(r"[0-9a-z\u0900-\u0963\u0966-\u097f]+|\|")
 _CLAUSE_WORDS = {
     "but", "and", "lekin", "par", "magar", "aur", "लेकिन", "पर", "मगर", "और",
 }  # fmt: skip
@@ -74,12 +74,12 @@ def _canonical(token: str) -> str:
     if token.isascii():
         return _latin(token)
     # Nukta and chandrabindu are often typed without, or as anusvara.
-    return token.replace("़", "").replace("ँ", "ं")
+    return token.replace("\u093c", "").replace("\u0901", "\u0902")
 
 
 def _tokens(text: str) -> list[str]:
     text = unicodedata.normalize("NFKC", text).casefold()
-    text = re.sub(r"[​-‍⁠﻿'’]", "", text)
+    text = re.sub(r"[\u200b-\u200d\u2060\ufeff'’]", "", text)
     text = _PUNCTUATION.sub(f" {_BOUNDARY} ", text)
     tokens = [_canonical(t) if t != _BOUNDARY else t for t in _TOKEN.findall(text)]
     return [_BOUNDARY if t in _CLAUSE_WORDS else t for t in tokens]
