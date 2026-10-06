@@ -138,6 +138,8 @@ def test_negation_elsewhere_does_not_hide_sign(text, sign):
         "I am fit and healthy",
         "pregnancy mein khoon ki jaanch kab karani hai",
         "delivery ke baad khoon ki kami ho gayi",
+        "bachcha doodh pi raha hai, koi dikkat nahi",
+        "बच्चा दूध पी रहा है, कोई दिक्कत नहीं",
         "meri saas ko sugar hai",
         "baby is feeding well and sleeping",
         "breathing exercises in pregnancy are good?",

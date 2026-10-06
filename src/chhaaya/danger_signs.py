@@ -123,8 +123,17 @@ def _matches(
                 return
 
 
+def _is_negator(token: str) -> bool:
+    return token in _EN_NEG or token in _HI_NEG
+
+
 def _negated(tokens: list[str], positions: list[int]) -> bool:
     first, last = positions[0], positions[-1]
+    # A negator that belongs to the phrasing ("doodh pi nahi") must share a
+    # clause with the word before it, or "doodh pi raha, koi dikkat nahi" fires.
+    for prev, at in zip(positions, positions[1:], strict=False):
+        if _is_negator(tokens[at]) and _BOUNDARY in tokens[prev:at]:
+            return True
     # A negator between the phrase's words negates it only within one clause:
     # "khoon nahi aa raha", but not "khoon, tabiyat theek nahi, aa raha".
     clause_negated = False
@@ -134,7 +143,7 @@ def _negated(tokens: list[str], positions: list[int]) -> bool:
         elif i in positions:
             if clause_negated:
                 return True
-        elif tokens[i] in _EN_NEG or tokens[i] in _HI_NEG:
+        elif _is_negator(tokens[i]):
             clause_negated = True
     before = []
     for t in reversed(tokens[max(0, first - NEGATION_WINDOW) : first]):
