@@ -159,15 +159,24 @@ def test_missing_or_wrong_signature_is_rejected_and_nothing_is_stored(
     assert stored(engine) == []
 
 
-def test_a_blank_app_secret_is_refused_at_startup():
+@pytest.mark.parametrize("app_secret", [None, ""])
+def test_a_blank_app_secret_is_refused_at_startup(
+    monkeypatch: pytest.MonkeyPatch, tmp_path, app_secret: str | None
+):
     # An empty HMAC key is public knowledge, so signatures would prove nothing.
-    with pytest.raises(ValidationError):
-        Settings(
-            _env_file=None,
-            postgres_password="unused",
-            database_url="postgresql://unused",
-            whatsapp_verify_token=VERIFY_TOKEN,
-            whatsapp_app_secret="",
-            whatsapp_access_token="unused",
-            whatsapp_phone_number_id="unused",
-        )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("POSTGRES_PASSWORD", "unused")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://unused")
+    monkeypatch.setenv("WHATSAPP_VERIFY_TOKEN", VERIFY_TOKEN)
+    monkeypatch.setenv("WHATSAPP_ACCESS_TOKEN", "unused")
+    monkeypatch.setenv("WHATSAPP_PHONE_NUMBER_ID", "unused")
+    if app_secret is None:
+        monkeypatch.delenv("WHATSAPP_APP_SECRET", raising=False)
+    else:
+        monkeypatch.setenv("WHATSAPP_APP_SECRET", app_secret)
+    get_settings.cache_clear()
+    try:
+        with pytest.raises(ValidationError), TestClient(app):
+            pass
+    finally:
+        get_settings.cache_clear()
