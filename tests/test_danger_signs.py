@@ -118,6 +118,7 @@ def test_negated_mention_does_not_fire(text, sign):
         ("bukhar nahi hai lekin wo behosh hai", "unconscious"),
         ("I don't know why she is bleeding, I am pregnant", "bleeding_in_pregnancy"),
         ("baby is not breathing", "difficulty_breathing"),
+        ("baby, not moving since morning", "reduced_fetal_movement"),
         (
             "main pregnant hoon, tabiyat theek nahi hai, khoon aa raha hai",
             "bleeding_in_pregnancy",

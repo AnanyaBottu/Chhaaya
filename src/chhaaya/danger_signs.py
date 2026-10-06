@@ -129,10 +129,12 @@ def _is_negator(token: str) -> bool:
 
 def _negated(tokens: list[str], positions: list[int]) -> bool:
     first, last = positions[0], positions[-1]
-    # A negator that belongs to the phrasing ("doodh pi nahi") must share a
-    # clause with the word before it, or "doodh pi raha, koi dikkat nahi" fires.
+    # A Hindi negator that belongs to the phrasing ("doodh pi nahi") must share
+    # a clause with the word before it, or "doodh pi raha, koi dikkat nahi"
+    # fires. English negators lead their clause ("baby, not moving"), so they
+    # may follow a boundary.
     for prev, at in zip(positions, positions[1:], strict=False):
-        if _is_negator(tokens[at]) and _BOUNDARY in tokens[prev:at]:
+        if tokens[at] in _HI_NEG and _BOUNDARY in tokens[prev:at]:
             return True
     # A negator between the phrase's words negates it only within one clause:
     # "khoon nahi aa raha", but not "khoon, tabiyat theek nahi, aa raha".
