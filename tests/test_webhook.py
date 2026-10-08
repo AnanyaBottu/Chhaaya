@@ -1,6 +1,9 @@
 import hashlib
 import hmac
 import json
+import os
+import subprocess
+import sys
 
 import pytest
 from fastapi.testclient import TestClient
@@ -180,3 +183,43 @@ def test_a_blank_app_secret_is_refused_at_startup(
             pass
     finally:
         get_settings.cache_clear()
+
+
+def test_startup_errors_do_not_log_credentials(tmp_path):
+    env = {
+        **os.environ,
+        "POSTGRES_PASSWORD": "synthetic-db-password",
+        "DATABASE_URL": "postgresql://unused",
+        "WHATSAPP_VERIFY_TOKEN": "synthetic-verify-token",
+        "WHATSAPP_APP_SECRET": "synthetic-app-secret",
+        "WHATSAPP_ACCESS_TOKEN": "synthetic-access-token",
+    }
+    env.pop("WHATSAPP_PHONE_NUMBER_ID", None)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "chhaaya.app:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "0",
+        ],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    output = result.stdout + result.stderr
+    assert result.returncode != 0
+    assert "whatsapp_phone_number_id" in output
+    assert "Field required" in output
+    for name in (
+        "POSTGRES_PASSWORD",
+        "WHATSAPP_VERIFY_TOKEN",
+        "WHATSAPP_APP_SECRET",
+        "WHATSAPP_ACCESS_TOKEN",
+    ):
+        assert env[name] not in output
