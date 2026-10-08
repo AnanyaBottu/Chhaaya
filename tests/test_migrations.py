@@ -1,56 +1,13 @@
-from collections.abc import Iterator
-from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from alembic import command
 from alembic.autogenerate import compare_metadata
-from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
-from sqlalchemy import Engine, create_engine, inspect, make_url, text
+from conftest import migrate
+from sqlalchemy import Engine, inspect, text
 from sqlalchemy.exc import IntegrityError
-from testcontainers.community.postgres import PostgresContainer
 
-from chhaaya.db import Base, sqlalchemy_url
-
-ALEMBIC_INI = Path(__file__).parents[1] / "alembic.ini"
-
-
-@pytest.fixture(scope="session")
-def postgres() -> Iterator[str]:
-    with PostgresContainer("pgvector/pgvector:pg16", driver=None) as container:
-        yield container.get_connection_url()
-
-
-@pytest.fixture
-def database_url(postgres: str) -> Iterator[str]:
-    """A fresh, empty database on the shared server, dropped after the test."""
-    name = f"test_{uuid4().hex}"
-    admin = create_engine(sqlalchemy_url(postgres), isolation_level="AUTOCOMMIT")
-    with admin.connect() as conn:
-        conn.execute(text(f'CREATE DATABASE "{name}"'))
-    yield make_url(postgres).set(database=name).render_as_string(hide_password=False)
-    with admin.connect() as conn:
-        conn.execute(text(f'DROP DATABASE "{name}" WITH (FORCE)'))
-    admin.dispose()
-
-
-def migrate(database_url: str, monkeypatch: pytest.MonkeyPatch, revision: str) -> None:
-    monkeypatch.setenv("DATABASE_URL", database_url)
-    monkeypatch.setenv("POSTGRES_PASSWORD", "unused-by-migrations")
-    config = Config(ALEMBIC_INI)
-    if revision == "base":
-        command.downgrade(config, revision)
-    else:
-        command.upgrade(config, revision)
-
-
-@pytest.fixture
-def engine(database_url: str, monkeypatch: pytest.MonkeyPatch) -> Iterator[Engine]:
-    migrate(database_url, monkeypatch, "head")
-    engine = create_engine(sqlalchemy_url(database_url))
-    yield engine
-    engine.dispose()
+from chhaaya.db import Base
 
 
 def add_patient(engine: Engine) -> int:
