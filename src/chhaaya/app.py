@@ -1,6 +1,19 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-app = FastAPI(title="Chhaaya")
+from chhaaya.webhook import get_settings, router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    get_settings()
+    yield
+
+
+app = FastAPI(title="Chhaaya", lifespan=lifespan)
+app.include_router(router)
 
 
 @app.get("/health")

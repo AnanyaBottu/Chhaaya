@@ -31,6 +31,10 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://localhost:8000/health')"]
+      interval: 2s
+      retries: 15
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -45,6 +49,16 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+
+  # Optional: `docker compose --profile tunnel up` exposes the app to Meta.
+  tunnel:
+    image: cloudflare/cloudflared:2026.9.3
+    profiles: [tunnel]
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - app
 
 volumes:
   pgdata:

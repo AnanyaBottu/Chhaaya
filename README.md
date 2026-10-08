@@ -16,10 +16,10 @@ Questions are answered by retrieving passages from MoHFW, ICMR and NHM documents
 
 ## Running it locally
 
-`docker compose up` starts the app, the worker and Postgres 16 with pgvector. Settings come from environment variables; `.env.example` lists them all. `GET /health` on port 8000 answers `{"status": "ok"}` once the app is up.
+`docker compose up` starts the app, the worker and Postgres 16 with pgvector. Settings come from environment variables; `.env.example` lists them all. The service refuses to start with a blank `WHATSAPP_*` value; without a Meta app, any non-blank placeholders work locally, but never deploy with guessable ones. `GET /health` on port 8000 answers `{"status": "ok"}` once the app is up.
 
 ```bash
-cp .env.example .env   # then set POSTGRES_PASSWORD
+cp .env.example .env   # then set POSTGRES_PASSWORD and the WHATSAPP_* values
 docker compose up --build
 curl localhost:8000/health
 ```
@@ -42,6 +42,29 @@ Every message is screened for danger signs by rules rather than a model, so anyo
 ```bash
 uv run python -c 'from chhaaya.danger_signs import detect; print(detect("bachcha doodh nahi pee raha"))'
 uv run pytest tests/test_danger_signs.py
+```
+
+## WhatsApp webhook
+
+Messages reach Chhaaya through the WhatsApp Cloud API. `POST /webhook` checks Meta's `X-Hub-Signature-256` signature against the app secret and rejects anything unsigned or forged. It stores each text, voice note and photo as a pending message keyed by its WhatsApp message id, so a retried delivery is ignored, and answers `200` straight away; the worker does the rest. `GET /webhook` answers Meta's verification challenge. `src/chhaaya/whatsapp.py` is the one client for sending text and audio, uploading media and downloading what patients send.
+
+To connect a test number:
+
+1. At developers.facebook.com create a Business app and add the WhatsApp product. API Setup gives you a test number: copy its phone number id and a temporary access token (valid 24 hours).
+2. Under App settings, Basic, copy the app secret.
+3. In API Setup add up to five recipient phones and confirm each with the code WhatsApp sends. The test number can only message these.
+4. Put the four values in `.env`: `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_APP_SECRET`, and a `WHATSAPP_VERIFY_TOKEN` of your choosing.
+5. In Cloudflare Zero Trust create a tunnel, add a public hostname that points to `http://app:8000`, and put its token in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`.
+6. In the Meta app, WhatsApp, Configuration, set the callback URL to `https://<your-hostname>/webhook` and the verify token to your `WHATSAPP_VERIFY_TOKEN`, then subscribe to the `messages` field.
+
+```bash
+docker compose --profile tunnel up --build
+```
+
+Send a text, a voice note and a photo from a recipient phone; each should appear once in the `messages` table.
+
+```bash
+docker compose exec db psql -U chhaaya -c "SELECT wa_message_id, kind, status FROM messages"
 ```
 
 ## Contributing
