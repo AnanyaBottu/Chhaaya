@@ -3,7 +3,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="forbid")
+    model_config = SettingsConfigDict(
+        env_file=".env", extra="forbid", hide_input_in_errors=True
+    )
 
     postgres_password: str
     database_url: str
