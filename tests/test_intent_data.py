@@ -27,6 +27,19 @@ def test_training_set_is_big_balanced_and_in_the_right_script():
         assert has_devanagari == (row["language"] == "hi"), row["text"]
 
 
+def test_test_set_is_forty_per_language_and_shares_nothing_with_training():
+    test = load_labelled(DATA / "test.csv")
+    train = {row["text"].strip().lower() for row in load_labelled(DATA / "train.csv")}
+
+    counts = Counter((row["language"], row["label"]) for row in test)
+    for language in ("hi", "en", "hinglish"):
+        assert sum(n for (lang, _), n in counts.items() if lang == language) == 40
+        assert all(counts[language, label] >= 5 for label in LABELS)
+    assert not [row["text"] for row in test if row["text"].strip().lower() in train]
+    for row in test:
+        assert bool(DEVANAGARI.search(row["text"])) == (row["language"] == "hi")
+
+
 def test_a_repeated_message_is_rejected(tmp_path: Path):
     path = tmp_path / "train.csv"
     path.write_text("text,label,language\nhello,smalltalk,en\nhello,smalltalk,en\n")
