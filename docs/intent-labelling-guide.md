@@ -27,8 +27,9 @@ Every message from a patient gets exactly one of four labels. The router (design
 | remind me to take my BP tablet at 8 | `reminder_setup` | Asks for a reminder |
 | mujhe iron ki goli roz leni hai, kaise yaad rakhun | `reminder_setup` | "How do I remember" asks for help being reminded |
 | iron ki goli ke baad ulti aa rahi hai | `question` | Describes a symptom; no reminder involved |
-| le li, par chakkar aa raha hai | `question` | A dose report with a symptom: the symptom matters more (rule 3) |
-| nahi li, kal se band kar do | `reminder_setup` | Asks to stop the reminder |
+| le li, par chakkar aa raha hai | `question` | A symptom belongs with the Q&A agent, even inside a dose report |
+| nahi li, kal se reminder band kar do | `reminder_setup` | Asks to stop the reminder |
+| nahi li, kal se goli band kar du | `question` | Asks about stopping the medicine, which Chhaaya never decides (rule 3) |
 | taken. thank you | `reminder_reply` | Reports the dose; the thanks is secondary |
 | thank you, bahut madad mili | `smalltalk` | Only thanks |
 | aap kaun ho | `smalltalk` | About the bot, not about health |
