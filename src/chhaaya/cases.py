@@ -30,6 +30,10 @@ USAGE = (
     "To answer a case, start with its number, for example: "
     "12 Give ORS and bring the child to the PHC today."
 )
+SHARED_WARNING = (
+    "\nYour answer will also be saved to help other patients, so leave out "
+    "names and personal details."
+)
 NOT_OPEN = "Case {number} is not open for you. Check the number and try again."
 NOTICE = {
     "en": "We have sent your question to your ASHA. She will reply here.",
@@ -110,11 +114,12 @@ class Cases:
             ).scalar_one()
             asha_in_window = in_window(conn, people.asha_id)
         label = LABELS[cause]
+        shared = SHARED_WARNING if cause in QUESTION_CAUSES else ""
         if asha_in_window:
             self.whatsapp.send_text(
                 people.asha_wa_id,
                 f"Case {number}: {label} from {people.wa_id}.\n{details}\n\n"
-                f"Reply with: {number} <your answer>",
+                f"Reply with: {number} <your answer>{shared}",
             )
         else:
             self.whatsapp.send_template(
@@ -154,13 +159,14 @@ class Cases:
                 self.whatsapp.send_text(message.wa_id, NOT_OPEN.format(number=number))
                 return
             if case.cause in QUESTION_CAUSES:
-                knowledge = f"{case.details}\n{reply}"
+                # Later patients may be shown the answer, so it is stored alone;
+                # the question only shapes the embedding that finds it.
                 conn.execute(
                     insert(KbChunk).values(
-                        text=knowledge,
+                        text=reply,
                         title="Answered by a health worker",
                         source_type="health_worker_answer",
-                        embedding=self.embed([knowledge])[0],
+                        embedding=self.embed([f"{case.details}\n{reply}"])[0],
                     )
                 )
             # A prescription is explained to the patient by the document agent
