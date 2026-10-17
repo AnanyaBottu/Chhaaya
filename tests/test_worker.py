@@ -23,6 +23,7 @@ class World:
         self.voice_notes: list[str] = []
         self.language: tuple[str, str] | None = ("hi-IN", "Latn")
         self.transcript: str | None = None  # None means speech-to-text is down
+        self.transcript_language: str | None = "hi-IN"
         self.sarvam_calls: list[str] = []
         self.whatsapp_up = True
         self.agent_calls: list[tuple[str, int]] = []
@@ -68,7 +69,11 @@ class World:
             if self.transcript is None:
                 return httpx2.Response(500, json={"error": {"message": "down"}})
             return httpx2.Response(
-                200, json={"transcript": self.transcript, "language_code": "hi-IN"}
+                200,
+                json={
+                    "transcript": self.transcript,
+                    "language_code": self.transcript_language,
+                },
             )
         if self.language is None:
             return httpx2.Response(500, json={"error": {"message": "down"}})
@@ -354,4 +359,40 @@ def test_a_voice_note_that_cannot_be_read_gets_a_text_reply_not_silence(world: W
     assert to == "911111111111" and "108" in reply and "type" in reply
     assert world.voice_notes == []
     assert world.message(message).status == "failed"
+    assert world.agent_calls == []
+
+
+def test_a_dangerous_voice_note_in_another_language_still_opens_a_case(world: World):
+    # Saaras can label a Hindi-belt speaker as Marathi; the words are still screened.
+    world.transcript = "pregnancy mein khoon aa raha hai"
+    world.transcript_language = "mr-IN"
+    asha = world.add_user("919999999999", "asha")
+    patient = world.add_user("911111111111", asha=asha)
+    message = world.receive(patient, kind="audio")
+
+    world.worker.work_one()
+
+    [(to, reply)] = world.sent
+    assert to == "911111111111" and "108" in reply
+    assert world.cases() == [("danger_sign", patient, asha, "open")]
+    assert world.message(message) == ("done", None, world.transcript, None)
+
+
+@pytest.mark.parametrize(
+    ("transcript", "language"), [("vanakkam", "ta-IN"), ("", "hi-IN")]
+)
+def test_a_voice_note_in_another_language_or_silent_asks_the_patient_to_type(
+    world: World, transcript: str, language: str
+):
+    world.transcript = transcript
+    world.transcript_language = language
+    patient = world.add_user("911111111111")
+    message = world.receive(patient, kind="audio")
+
+    world.worker.work_one()
+
+    [(to, reply)] = world.sent
+    assert to == "911111111111" and "108" in reply and "type" in reply
+    assert world.message(message).status == "failed"
+    assert world.user(patient) == (None, None)
     assert world.agent_calls == []

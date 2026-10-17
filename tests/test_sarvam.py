@@ -64,11 +64,12 @@ def test_a_failed_call_is_logged_with_its_request_id_and_still_raises(
 
 
 @pytest.mark.parametrize("language_code", ["ta-IN", None])
-def test_speech_in_an_unsupported_language_is_refused(language_code):
+def test_speech_in_an_unsupported_language_keeps_its_transcript(language_code):
     def handler(_: httpx2.Request) -> httpx2.Response:
         return httpx2.Response(
             200, json={"transcript": "vanakkam", "language_code": language_code}
         )
 
-    with pytest.raises(ValueError, match="unsupported language"):
-        client(handler).transcribe(b"x", "audio/ogg")
+    text, language, _ = client(handler).transcribe(b"x", "audio/ogg")
+
+    assert (text, language) == ("vanakkam", None)

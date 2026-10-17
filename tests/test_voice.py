@@ -58,9 +58,11 @@ def test_when_speech_fails_the_text_has_already_gone_and_nothing_raises(
     assert "911111111111" not in caplog.text
 
 
-def test_without_a_known_language_only_text_is_sent():
+def test_without_a_known_language_only_text_is_sent(caplog: pytest.LogCaptureFixture):
     whatsapp, sarvam, requests = clients(speech_works=True)
 
-    send_reply(whatsapp, sarvam, "911111111111", "Namaste", None)
+    with caplog.at_level(logging.ERROR):
+        send_reply(whatsapp, sarvam, "911111111111", "Namaste", None)
 
     assert [r.url.path for r in requests] == ["/v23.0/123/messages"]
+    assert caplog.records == []
