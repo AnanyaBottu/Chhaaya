@@ -120,6 +120,8 @@ class Case(Base):
     cause: Mapped[str]
     patient_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     asha_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    # What the ASHA is asked about: the patient's question or the finding.
+    details: Mapped[str | None]
     status: Mapped[str] = mapped_column(server_default="open")
     asha_reply: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
