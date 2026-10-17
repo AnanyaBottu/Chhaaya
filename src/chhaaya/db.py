@@ -88,6 +88,8 @@ class Message(Base):
     # -> done or failed.
     status: Mapped[str | None]
     claimed_at: Mapped[datetime | None]
+    # Set when the worker marks the message failed, and only then.
+    error: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     __table_args__ = (
@@ -99,6 +101,9 @@ class Message(Base):
         CheckConstraint(
             "(direction = 'inbound') = (status IS NOT NULL)",
             name="only_inbound_has_status",
+        ),
+        CheckConstraint(
+            "(status = 'failed') = (error IS NOT NULL)", name="failed_has_error"
         ),
         Index("ix_messages_pending", "id", postgresql_where="status = 'pending'"),
     )

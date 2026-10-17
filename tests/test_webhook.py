@@ -28,6 +28,7 @@ def client(engine: Engine):
         whatsapp_app_secret=APP_SECRET,
         whatsapp_access_token="unused",
         whatsapp_phone_number_id="unused",
+        sarvam_api_key="unused",
     )
     app.dependency_overrides[get_engine] = lambda: engine
     app.dependency_overrides[get_settings] = lambda: settings
