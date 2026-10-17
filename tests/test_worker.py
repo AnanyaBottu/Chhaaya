@@ -188,7 +188,7 @@ def test_the_asha_case_opens_even_when_the_urgent_reply_cannot_be_sent(
     world.worker.work_one()
 
     assert world.cases() == [("danger_sign", patient, asha, "open")]
-    status, error = world.message(message)
+    status, error, *_ = world.message(message)
     assert status == "failed"
     assert "401" in error
 
