@@ -11,6 +11,7 @@ def to_ogg_opus(wav: bytes) -> bytes:
         + ["pipe:1"],
         input=wav,
         capture_output=True,
+        timeout=30,  # seconds; a stuck ffmpeg would stall the only worker
     )
     if result.returncode != 0:
         raise RuntimeError(f"ffmpeg failed: {result.stderr.decode(errors='replace')}")
