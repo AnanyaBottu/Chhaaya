@@ -14,6 +14,7 @@ from chhaaya.cases import open_case
 from chhaaya.db import sqlalchemy_url
 from chhaaya.sarvam import SarvamClient
 from chhaaya.settings import Settings
+from chhaaya.voice import send_voice
 from chhaaya.whatsapp import WhatsAppClient
 
 log = logging.getLogger("chhaaya.worker")
@@ -146,14 +147,16 @@ class Worker:
         return replace(message, language=language, script=script)
 
     def escalate(self, message: Inbound, signs: list[str]) -> None:
-        """Reply first, and open the ASHA's case even if the reply fails."""
+        """Reply in text, open the ASHA's case even if that fails, then speak it."""
         log.warning("danger signs %s in message %s", signs, message.id)
+        reply = urgent_reply(message)
         try:
-            self.whatsapp.send_text(message.wa_id, urgent_reply(message))
+            self.whatsapp.send_text(message.wa_id, reply)
         finally:
             if message.asha_id is not None:
                 with self.engine.begin() as conn:
                     open_case(conn, "danger_sign", message.user_id, message.asha_id)
+        send_voice(self.whatsapp, self.sarvam, message.wa_id, reply, message.language)
         if message.asha_id is None:
             raise LookupError("patient has no ASHA to alert")
 
