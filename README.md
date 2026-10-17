@@ -107,6 +107,14 @@ docker compose up --build worker
 docker compose exec db psql -U chhaaya -c "SELECT id, status, error FROM messages"
 ```
 
+## Voice
+
+Patients can send voice notes and get voice notes back. An inbound voice note is downloaded from WhatsApp and transcribed with Sarvam Saaras v3, which also detects the language; the transcript and language are stored on the message and the user, and the message then goes through the same danger-sign check and routing as typed text. If the voice note cannot be read, the patient gets a text asking them to type, with the 108 emergency number, and the message is marked failed. Replies go out as text first, then the same words as a voice note: Sarvam Bulbul v3 speaks them in the patient's language, ffmpeg converts the WAV to OGG/Opus so WhatsApp shows a voice note, and the file is uploaded and sent by media id. If the voice step fails the text has already gone out, and the failure is logged with Sarvam's request id. All Sarvam calls are in `src/chhaaya/sarvam.py`. ffmpeg is bundled in the Docker image; to run the tests outside Docker install it (`sudo apt install ffmpeg`).
+
+```bash
+uv run pytest tests/test_audio.py tests/test_voice.py tests/test_worker.py
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [AGENTS.md](AGENTS.md) for the rules every change and coding agent follows.
