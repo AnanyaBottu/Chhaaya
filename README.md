@@ -124,6 +124,8 @@ Anything Chhaaya should not answer alone goes to the patient's ASHA as a numbere
 | `asha_case_alert` | `{{1}}` case number, `{{2}}` what it is about, `{{3}}` patient's number, `{{4}}` details |
 | `case_update` | `{{1}}` the ASHA's answer |
 
+Meta limits a template body to 1024 characters with its variables filled in. Keep the fixed text of `asha_case_alert` under 450 characters so a 500-character summary still fits.
+
 ```bash
 uv run pytest tests/test_cases.py
 ```
