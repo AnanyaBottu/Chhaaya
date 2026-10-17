@@ -10,11 +10,12 @@ from testcontainers.community.postgres import PostgresContainer
 
 from chhaaya.db import sqlalchemy_url
 
-WHATSAPP_ENV = (
+REQUIRED_ENV = (
     "WHATSAPP_VERIFY_TOKEN",
     "WHATSAPP_APP_SECRET",
     "WHATSAPP_ACCESS_TOKEN",
     "WHATSAPP_PHONE_NUMBER_ID",
+    "SARVAM_API_KEY",
 )
 ALEMBIC_INI = Path(__file__).parents[1] / "alembic.ini"
 
@@ -41,7 +42,7 @@ def database_url(postgres: str) -> Iterator[str]:
 def migrate(database_url: str, monkeypatch: pytest.MonkeyPatch, revision: str) -> None:
     monkeypatch.setenv("DATABASE_URL", database_url)
     monkeypatch.setenv("POSTGRES_PASSWORD", "unused-by-migrations")
-    for name in WHATSAPP_ENV:
+    for name in REQUIRED_ENV:
         monkeypatch.setenv(name, "unused-by-migrations")
     config = Config(ALEMBIC_INI)
     if revision == "base":
