@@ -19,7 +19,8 @@ from chhaaya.whatsapp import WhatsAppClient
 
 log = logging.getLogger("chhaaya.worker")
 DEVANAGARI = re.compile("[\u0900-\u097f]")
-# Sent when a voice note cannot be read, so it is never screened for danger signs.
+# Sent when a voice note has no transcript in a supported language. One that cannot
+# be transcribed at all is never screened for danger signs.
 VOICE_UNREADABLE = (
     "We could not understand your voice note. Please type your message. "
     "If it is an emergency, call 108.\n\n"
@@ -106,10 +107,14 @@ class Worker:
     def process(self, message: Inbound) -> None:
         if message.role == "asha":
             return self.route("escalation", message)
+        understood = True
         if message.kind == "audio":
-            message = self.transcribe(message)
+            message, understood = self.transcribe(message)
         if message.body and (signs := danger_signs.detect(message.body)):
             return self.escalate(message, signs)
+        if not understood:
+            self.whatsapp.send_text(message.wa_id, VOICE_UNREADABLE)
+            raise ValueError("voice note is silent or in an unsupported language")
         if message.kind == "text":
             message = self.store_language(message)
         self.route("document" if message.kind == "image" else "qa", message)
@@ -119,8 +124,11 @@ class Worker:
             raise LookupError(f"no {agent} agent is registered")
         self.agents[agent](message)
 
-    def transcribe(self, message: Inbound) -> Inbound:
-        """Turn a voice note into text on the message, or tell the patient to type."""
+    def transcribe(self, message: Inbound) -> tuple[Inbound, bool]:
+        """Put a voice note's transcript on the message, or tell the patient to type.
+
+        False means the transcript is empty or in an unsupported language.
+        """
         try:
             audio = self.whatsapp.download_media(message.media_id or "")
             body, language, script = self.sarvam.transcribe(audio, "audio/ogg")
@@ -132,7 +140,10 @@ class Worker:
                 text("UPDATE messages SET body = :body, language = :l WHERE id = :id"),
                 {"body": body, "l": language, "id": message.id},
             )
-        return self.save_language(replace(message, body=body), language, script)
+        message = replace(message, body=body)
+        if language is None or not body:
+            return message, False
+        return self.save_language(message, language, script), True
 
     def store_language(self, message: Inbound) -> Inbound:
         language, script = self.sarvam.identify_language(message.body or "")

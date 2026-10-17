@@ -18,7 +18,7 @@ DEVANAGARI = re.compile("[ऀ-ॿ]")
 SPEECH_TIMEOUT = 30  # seconds; speech calls are slower than text calls
 
 
-def supported(language_code: str | None, script_code: str | None = None) -> str:
+def supported(language_code: str | None, script_code: str | None) -> str:
     """The language ("hi" or "en") for a Sarvam code, or ValueError."""
     language = LANGUAGES.get(language_code or "")
     if language is None or script_code not in (None, "Deva", "Latn"):
@@ -39,15 +39,19 @@ class SarvamClient:
         script = found["script_code"]
         return supported(found["language_code"], script), script
 
-    def transcribe(self, audio: bytes, mime_type: str) -> tuple[str, str, str]:
-        """Speech to text: the transcript, its language and its script."""
+    def transcribe(self, audio: bytes, mime_type: str) -> tuple[str, str | None, str]:
+        """Speech to text: the transcript, its language (None if unsupported), script.
+
+        An unsupported language still returns its transcript, so the caller can
+        screen it for danger signs.
+        """
         found = self._post(
             "speech-to-text",
             data={"model": STT_MODEL, "mode": "transcribe", "language_code": "unknown"},
             files={"file": ("voice", audio, mime_type)},
             timeout=SPEECH_TIMEOUT,
         ).json()
-        language = supported(found["language_code"])
+        language = LANGUAGES.get(found["language_code"] or "")
         script = "Deva" if DEVANAGARI.search(found["transcript"]) else "Latn"
         return found["transcript"], language, script
 
