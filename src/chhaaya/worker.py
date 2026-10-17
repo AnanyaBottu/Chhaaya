@@ -109,13 +109,16 @@ class Worker:
             )
 
     def escalate(self, message: Inbound, signs: list[str]) -> None:
-        """Answer a danger sign first, with nothing that can fail before the reply."""
+        """Reply first, and open the ASHA's case even if the reply fails."""
         log.warning("danger signs %s in message %s", signs, message.id)
-        self.whatsapp.send_text(message.wa_id, urgent_reply(message))
+        try:
+            self.whatsapp.send_text(message.wa_id, urgent_reply(message))
+        finally:
+            if message.asha_id is not None:
+                with self.engine.begin() as conn:
+                    open_case(conn, "danger_sign", message.user_id, message.asha_id)
         if message.asha_id is None:
             raise LookupError("patient has no ASHA to alert")
-        with self.engine.begin() as conn:
-            open_case(conn, "danger_sign", message.user_id, message.asha_id)
 
 
 def urgent_reply(message: Inbound) -> str:
