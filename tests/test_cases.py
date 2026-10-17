@@ -57,6 +57,7 @@ def test_a_question_case_alerts_the_asha_tells_the_patient_and_relays_the_answer
 
     [alert] = world.texts_to(ASHA)
     assert f"{number} " in alert and "kya ORS roz de sakte hain" in alert
+    assert "personal details" in alert  # the answer will be shared
     [notice] = world.texts_to(PATIENT)
     assert "ASHA" in notice
 
@@ -69,9 +70,11 @@ def test_a_question_case_alerts_the_asha_tells_the_patient_and_relays_the_answer
     assert world.voice_notes[-1] == PATIENT
     assert case(world, number) == ("answered", "Haan, dast mein ORS roz dein")
     assert world.message(reply).status == "done"
-    [(stored, source_type)] = chunks(world)
-    assert source_type == "health_worker_answer"
-    assert "kya ORS roz de sakte hain" in stored and "ORS roz dein" in stored
+    # Only the answer is shared with later patients, never this patient's words.
+    assert chunks(world) == [("Haan, dast mein ORS roz dein", "health_worker_answer")]
+    assert (
+        world.embedded[-1] == "kya ORS roz de sakte hain\nHaan, dast mein ORS roz dein"
+    )
 
 
 def test_outside_the_24_hour_window_both_sides_get_templates(world: World):
