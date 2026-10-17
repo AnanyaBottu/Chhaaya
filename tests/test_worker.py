@@ -9,9 +9,15 @@ import pytest
 from sqlalchemy import Engine, text
 from test_audio import tone
 
+from chhaaya.cases import Cases
 from chhaaya.sarvam import SarvamClient
 from chhaaya.whatsapp import WhatsAppClient
 from chhaaya.worker import Inbound, Worker
+
+
+def embed(texts):
+    """A stand-in for BGE-M3: one fixed 1024-dimensional vector per text."""
+    return [[1.0] + [0.0] * 1023 for _ in texts]
 
 
 class World:
@@ -20,6 +26,7 @@ class World:
     def __init__(self, engine: Engine):
         self.engine = engine
         self.sent: list[tuple[str, str]] = []
+        self.templates: list[tuple[str, str, list[str]]] = []
         self.voice_notes: list[str] = []
         self.language: tuple[str, str] | None = ("hi-IN", "Latn")
         self.transcript: str | None = None  # None means speech-to-text is down
@@ -31,12 +38,10 @@ class World:
         self.agents: dict[str, Callable[[Inbound], None]] = {
             name: self.agent(name) for name in ("qa", "document", "escalation")
         }
-        self.worker = Worker(
-            engine,
-            WhatsAppClient("token", "123456", http),
-            SarvamClient("key", http),
-            self.agents,
-        )
+        whatsapp = WhatsAppClient("token", "123456", http)
+        sarvam = SarvamClient("key", http)
+        self.cases_ = Cases(engine, whatsapp, sarvam, embed)
+        self.worker = Worker(engine, whatsapp, sarvam, self.cases_, self.agents)
 
     def agent(self, name: str) -> Callable[[Inbound], None]:
         return lambda message: self.agent_calls.append((name, message.id))
@@ -57,6 +62,10 @@ class World:
         body = json.loads(request.read())
         if body["type"] == "audio":
             self.voice_notes.append(body["to"])
+        elif body["type"] == "template":
+            template = body["template"]
+            params = [p["text"] for p in template["components"][0]["parameters"]]
+            self.templates.append((body["to"], template["name"], params))
         else:
             self.sent.append((body["to"], body["text"]["body"]))
         return httpx2.Response(200, json={"messages": [{"id": "wamid.out"}]})
@@ -125,6 +134,9 @@ class World:
                 text("SELECT language, script FROM users WHERE id = :id"),
                 {"id": user_id},
             ).one()
+
+    def texts_to(self, wa_id: str) -> list[str]:
+        return [body for to, body in self.sent if to == wa_id]
 
     def cases(self):
         with self.engine.connect() as conn:
