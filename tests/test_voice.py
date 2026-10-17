@@ -55,6 +55,7 @@ def test_when_speech_fails_the_text_has_already_gone_and_nothing_raises(
 
     assert [r.url.path for r in requests] == ["/v23.0/123/messages", "/text-to-speech"]
     assert "r1" in caplog.text
+    assert "911111111111" not in caplog.text
 
 
 def test_without_a_known_language_only_text_is_sent():
