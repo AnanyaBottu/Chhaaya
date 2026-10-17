@@ -35,6 +35,15 @@ CLAIM = text("""
     FROM claimed c JOIN users u ON u.id = c.user_id
 """)
 
+# A message still processing this long after its claim lost its worker (killed, or
+# the database went away before the result was saved). It is failed, not retried,
+# so a reply that may already have gone out is never sent twice.
+ABANDON = text("""
+    UPDATE messages SET status = 'failed', error = 'worker stopped before finishing it'
+    WHERE status = 'processing' AND claimed_at < now() - interval '10 minutes'
+    RETURNING id
+""")
+
 
 @dataclass(frozen=True)
 class Inbound:
@@ -61,6 +70,8 @@ class Worker:
     def work_one(self) -> bool:
         """Process the oldest pending message; False when there is none."""
         with self.engine.begin() as conn:
+            for abandoned in conn.execute(ABANDON).scalars():
+                log.error("message %s was abandoned by a stopped worker", abandoned)
             row = conn.execute(CLAIM).one_or_none()
         if row is None:
             return False
