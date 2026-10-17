@@ -10,8 +10,9 @@ from dataclasses import dataclass, replace
 from sqlalchemy import Engine, create_engine, text
 
 from chhaaya import danger_signs
-from chhaaya.cases import open_case
+from chhaaya.cases import Cases
 from chhaaya.db import sqlalchemy_url
+from chhaaya.retrieval import bge_m3
 from chhaaya.sarvam import SarvamClient
 from chhaaya.settings import Settings
 from chhaaya.voice import send_voice
@@ -73,6 +74,7 @@ class Worker:
     engine: Engine
     whatsapp: WhatsAppClient
     sarvam: SarvamClient
+    cases: Cases
     # "qa", "document" and "escalation" each take the message and reply.
     agents: dict[str, Callable[[Inbound], None]]
 
@@ -165,8 +167,8 @@ class Worker:
             self.whatsapp.send_text(message.wa_id, reply)
         finally:
             if message.asha_id is not None:
-                with self.engine.begin() as conn:
-                    open_case(conn, "danger_sign", message.user_id, message.asha_id)
+                details = f"Danger signs: {', '.join(signs)}. Message: {message.body}"
+                self.cases.open("danger_sign", message.user_id, details)
         send_voice(self.whatsapp, self.sarvam, message.wa_id, reply, message.language)
         if message.asha_id is None:
             raise LookupError("patient has no ASHA to alert")
@@ -188,14 +190,14 @@ def urgent_reply(message: Inbound) -> str:
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     settings = Settings()
-    worker = Worker(
-        create_engine(sqlalchemy_url(settings.database_url)),
-        WhatsAppClient(
-            settings.whatsapp_access_token, settings.whatsapp_phone_number_id
-        ),
-        SarvamClient(settings.sarvam_api_key),
-        agents={},  # the Q&A, document and escalation agents register here as they land
+    engine = create_engine(sqlalchemy_url(settings.database_url))
+    whatsapp = WhatsAppClient(
+        settings.whatsapp_access_token, settings.whatsapp_phone_number_id
     )
+    sarvam = SarvamClient(settings.sarvam_api_key)
+    cases = Cases(engine, whatsapp, sarvam, bge_m3())
+    # The Q&A and document agents register here as they land.
+    worker = Worker(engine, whatsapp, sarvam, cases, {"escalation": cases.answer})
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: stop.set())
