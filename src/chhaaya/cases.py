@@ -47,6 +47,9 @@ REPLY_PREFIX = {
     "hi-Latn": "Aapki ASHA didi ka jawab:",
 }
 TEMPLATE_LANGUAGES = {"hi": "hi", "en": "en"}
+# The alert quotes at most this many characters of the details, so it stays within
+# the 1024-character body of the asha_case_alert template. The case keeps them all.
+SUMMARY_LIMIT = 500
 
 
 def in_language(texts: dict[str, str], language: str | None, script: str | None) -> str:
@@ -61,6 +64,13 @@ def in_language(texts: dict[str, str], language: str | None, script: str | None)
 def one_line(value: str) -> str:
     """Template parameters may not contain newlines or runs of spaces."""
     return " ".join(value.split())
+
+
+def summary(details: str) -> str:
+    """The case details, cut to SUMMARY_LIMIT characters for the alert."""
+    if len(details) <= SUMMARY_LIMIT:
+        return details
+    return details[: SUMMARY_LIMIT - 1] + "…"
 
 
 def in_window(conn: Connection, user_id: int) -> bool:
@@ -85,8 +95,9 @@ class Cases:
         """Open a numbered case, alert the patient's ASHA and tell the patient.
 
         A danger-sign patient has already had the urgent reply, so is not told
-        again. The case is saved before any message, so a failed alert still
-        leaves it open for the ASHA.
+        again, and neither is a patient outside the 24-hour window. The case is
+        saved before any message, so a failed alert still leaves it open for the
+        ASHA.
         """
         with self.engine.begin() as conn:
             people = conn.execute(
@@ -113,12 +124,13 @@ class Cases:
                 },
             ).scalar_one()
             asha_in_window = in_window(conn, people.asha_id)
+            patient_in_window = in_window(conn, patient_id)
         label = LABELS[cause]
         shared = SHARED_WARNING if cause in QUESTION_CAUSES else ""
         if asha_in_window:
             self.whatsapp.send_text(
                 people.asha_wa_id,
-                f"Case {number}: {label} from {people.wa_id}.\n{details}\n\n"
+                f"Case {number}: {label} from {people.wa_id}.\n{summary(details)}\n\n"
                 f"Reply with: {number} <your answer>{shared}",
             )
         else:
@@ -126,9 +138,11 @@ class Cases:
                 people.asha_wa_id,
                 "asha_case_alert",
                 TEMPLATE_LANGUAGES.get(people.asha_language, "hi"),
-                [str(number), label, people.wa_id, one_line(details)],
+                [str(number), label, people.wa_id, one_line(summary(details))],
             )
-        if cause != "danger_sign":
+        # No approved template carries the notice, so outside the window the
+        # patient hears from the case only when the ASHA's case_update arrives.
+        if cause != "danger_sign" and patient_in_window:
             notice = in_language(NOTICE, people.language, people.script)
             send_reply(
                 self.whatsapp, self.sarvam, people.wa_id, notice, people.language
