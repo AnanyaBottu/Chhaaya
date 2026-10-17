@@ -15,11 +15,6 @@ from chhaaya.whatsapp import WhatsAppClient
 from chhaaya.worker import Inbound, Worker
 
 
-def embed(texts):
-    """A stand-in for BGE-M3: one fixed 1024-dimensional vector per text."""
-    return [[1.0] + [0.0] * 1023 for _ in texts]
-
-
 class World:
     """The outside world: Meta and Sarvam answer from here, and agents record calls."""
 
@@ -40,8 +35,14 @@ class World:
         }
         whatsapp = WhatsAppClient("token", "123456", http)
         sarvam = SarvamClient("key", http)
-        self.cases_ = Cases(engine, whatsapp, sarvam, embed)
+        self.embedded: list[str] = []
+        self.cases_ = Cases(engine, whatsapp, sarvam, self.embed)
         self.worker = Worker(engine, whatsapp, sarvam, self.cases_, self.agents)
+
+    def embed(self, texts):
+        """A stand-in for BGE-M3: one fixed 1024-dimensional vector per text."""
+        self.embedded.extend(texts)
+        return [[1.0] + [0.0] * 1023 for _ in texts]
 
     def agent(self, name: str) -> Callable[[Inbound], None]:
         return lambda message: self.agent_calls.append((name, message.id))
