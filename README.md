@@ -98,6 +98,15 @@ Send a text, a voice note and a photo from a recipient phone; each should appear
 docker compose exec db psql -U chhaaya -c "SELECT wa_message_id, kind, status FROM messages"
 ```
 
+## Worker
+
+The worker turns stored messages into replies. It claims the oldest pending message with `SELECT ... FOR UPDATE SKIP LOCKED`, so two workers never take the same one, and marks it `processing`. Messages from a registered ASHA go straight to the escalation agent. For a patient, the danger-sign check runs first: a match sends the urgent reply in the patient's language and opens a case for their ASHA, without calling Sarvam, so a Sarvam outage cannot delay it. Otherwise typed text goes through Sarvam language identification, which stores the language and script on the user, and then to an agent: photos to the document agent, text to the Q&A agent. A message that raises is marked `failed` with the error kept in `messages.error`; it is never retried. Voice notes fail until speech-to-text lands, and a message fails if its agent is not registered. The agents register in `main()` in `src/chhaaya/worker.py` as they are built, so today every non-danger message fails with "no ... agent is registered". `SARVAM_API_KEY` in `.env` is required.
+
+```bash
+docker compose up --build worker
+docker compose exec db psql -U chhaaya -c "SELECT id, status, error FROM messages"
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [AGENTS.md](AGENTS.md) for the rules every change and coding agent follows.
