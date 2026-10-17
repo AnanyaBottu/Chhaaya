@@ -21,6 +21,18 @@ class WhatsAppClient:
             to, {"type": "audio", "audio": {"id": media_id, "voice": True}}
         )
 
+    def send_template(
+        self, to: str, name: str, language: str, params: list[str]
+    ) -> str:
+        """Send an approved template, the only kind allowed outside the 24h window."""
+        parameters = [{"type": "text", "text": p} for p in params]
+        template = {
+            "name": name,
+            "language": {"code": language},
+            "components": [{"type": "body", "parameters": parameters}],
+        }
+        return self._send(to, {"type": "template", "template": template})
+
     def upload_media(self, data: bytes, mime_type: str) -> str:
         response = self.http.post(
             f"{GRAPH_URL}/{self.phone_number_id}/media",
