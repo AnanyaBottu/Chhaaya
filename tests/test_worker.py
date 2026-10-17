@@ -61,6 +61,10 @@ class World:
         if path.endswith("/media"):
             return httpx2.Response(200, json={"id": "media-up"})
         body = json.loads(request.read())
+        if body["type"] != "template" and not self.in_window(body["to"]):
+            # Meta refuses free-form messages outside the 24-hour window.
+            error = {"code": 131047, "message": "Re-engagement message"}
+            return httpx2.Response(400, json={"error": error})
         if body["type"] == "audio":
             self.voice_notes.append(body["to"])
         elif body["type"] == "template":
@@ -70,6 +74,18 @@ class World:
         else:
             self.sent.append((body["to"], body["text"]["body"]))
         return httpx2.Response(200, json={"messages": [{"id": "wamid.out"}]})
+
+    def in_window(self, wa_id: str) -> bool:
+        with self.engine.connect() as conn:
+            return conn.execute(
+                text(
+                    "SELECT EXISTS (SELECT 1 FROM messages m JOIN users u "
+                    "ON u.id = m.user_id WHERE u.wa_id = :wa_id "
+                    "AND m.direction = 'inbound' "
+                    "AND m.created_at > now() - interval '24 hours')"
+                ),
+                {"wa_id": wa_id},
+            ).scalar_one()
 
     def sarvam(self, path: str) -> httpx2.Response:
         if path.endswith("text-to-speech"):

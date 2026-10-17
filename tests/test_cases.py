@@ -84,6 +84,7 @@ def test_outside_the_24_hour_window_both_sides_get_templates(world: World):
 
     number = world.cases_.open("critical_lab_value", patient, "Hb 5.1 g/dL")
 
+    assert world.texts_to(PATIENT) == []  # no template carries the notice
     [(to, name, params)] = world.templates
     assert (to, name) == (ASHA, "asha_case_alert")
     assert str(number) in params and "Hb 5.1 g/dL" in params
@@ -125,6 +126,17 @@ def test_an_asha_cannot_answer_a_case_that_is_not_hers_or_is_closed(world: World
     assert case(world, number) == ("open", None)
     assert world.texts_to(PATIENT) == []
     [refusal] = world.texts_to("918888888888")
+    assert str(number) in refusal
+
+    world.receive(asha, body=f"{number} pehla jawab")
+    world.receive(asha, body=f"{number} doosra jawab")
+    world.worker.work_one()
+    world.worker.work_one()
+
+    assert case(world, number) == ("answered", "pehla jawab")
+    assert len(world.texts_to(PATIENT)) == 1
+    assert chunks(world) == [("pehla jawab", "health_worker_answer")]
+    [refusal] = world.texts_to(ASHA)  # the alert went out as a template
     assert str(number) in refusal
 
 
@@ -180,3 +192,30 @@ def test_a_patient_without_an_asha_cannot_have_a_case(world: World):
     patient = world.add_user(PATIENT)
     with pytest.raises(LookupError, match="ASHA"):
         world.cases_.open("weak_evidence", patient, "sawal")
+
+
+@pytest.mark.parametrize("asha_wrote_today", [True, False])
+def test_a_long_danger_sign_message_still_reaches_the_asha(
+    world: World, asha_wrote_today: bool
+):
+    asha, patient = setup(world)
+    if asha_wrote_today:
+        world.receive(asha, body="namaste")
+        world.worker.work_one()
+        world.sent.clear()
+    world.receive(
+        patient, body="usko jhatke aa rahe hain. " + "bahut dar lag raha hai " * 150
+    )
+
+    world.worker.work_one()
+
+    if asha_wrote_today:
+        [alert] = world.texts_to(ASHA)
+        assert "jhatke" in alert and len(alert) <= 1024
+    else:
+        [(to, _, params)] = world.templates
+        assert to == ASHA and any("jhatke" in p for p in params)
+        assert sum(len(p) for p in params) <= 900  # body limit 1024 with its text
+    with world.engine.connect() as conn:
+        details = conn.execute(text("SELECT details FROM cases")).scalar_one()
+    assert len(details) > 3000  # the full message stays on the case
