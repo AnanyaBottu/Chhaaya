@@ -33,15 +33,27 @@ def cohens_kappa(a: list[str], b: list[str]) -> float:
     observed = sum(x == y for x, y in zip(a, b, strict=True)) / n
     count_a, count_b = Counter(a), Counter(b)
     chance = sum(count_a[label] * count_b[label] for label in count_a) / n**2
+    if chance == 1:
+        raise ValueError("kappa is undefined when both labellers use only one label")
     return (observed - chance) / (1 - chance)
+
+
+def load_agreement(path: Path) -> dict[str, str]:
+    """Read one labeller's id,label file; fail on an unknown label or a repeated id."""
+    labels: dict[str, str] = {}
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            if row["label"] not in LABELS:
+                raise ValueError(f"unknown label {row['label']!r} for id {row['id']!r}")
+            if row["id"] in labels:
+                raise ValueError(f"repeated id {row['id']!r}")
+            labels[row["id"]] = row["label"]
+    return labels
 
 
 def main() -> None:
     """Print kappa for two id,label files given on the command line."""
-    first, second = (
-        {row["id"]: row["label"] for row in csv.DictReader(open(path, newline=""))}
-        for path in sys.argv[1:3]
-    )
+    first, second = (load_agreement(Path(path)) for path in sys.argv[1:3])
     if first.keys() != second.keys():
         raise SystemExit("the two files must label the same ids")
     ids = sorted(first, key=int)
