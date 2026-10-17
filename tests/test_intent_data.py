@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from chhaaya.intent_data import LABELS, cohens_kappa, load_labelled
+from chhaaya.intent_data import LABELS, cohens_kappa, load_agreement, load_labelled
 
 DATA = Path(__file__).parents[1] / "data/intent"
 DEVANAGARI = re.compile("[ऀ-ॿ]")
@@ -76,3 +76,26 @@ def test_kappa_is_one_for_identical_labels_and_zero_for_chance_agreement():
     a = ["question"] * 3 + ["smalltalk"] * 2
     b = ["question"] * 3 + ["smalltalk", "question"]
     assert cohens_kappa(a, b) == pytest.approx((0.8 - 0.56) / (1 - 0.56))
+
+
+@pytest.mark.parametrize(
+    ("rows", "error"),
+    [
+        ("1,question\n2,Question\n", "Question"),
+        ("1,question\n2,question \n", "question "),
+        ("1,question\n2,\n", "''"),
+        ("1,question\n1,smalltalk\n", "repeated id '1'"),
+    ],
+)
+def test_an_agreement_file_with_a_bad_label_or_repeated_id_is_rejected(
+    tmp_path: Path, rows: str, error: str
+):
+    path = tmp_path / "labeller.csv"
+    path.write_text("id,label\n" + rows)
+    with pytest.raises(ValueError, match=re.escape(error)):
+        load_agreement(path)
+
+
+def test_kappa_is_undefined_when_both_labellers_use_one_label():
+    with pytest.raises(ValueError, match="undefined"):
+        cohens_kappa(["question"] * 3, ["question"] * 3)
