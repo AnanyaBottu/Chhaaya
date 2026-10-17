@@ -262,3 +262,26 @@ def test_a_missing_agent_fails_the_message_instead_of_dropping_it(world: World):
 
 def test_nothing_pending_means_nothing_to_do(world: World):
     assert not world.worker.work_one()
+
+
+def test_a_message_stranded_by_a_dead_worker_is_failed_with_a_reason(world: World):
+    patient = world.add_user("911111111111")
+    stranded = world.receive(patient, body="pregnancy mein khoon aa raha hai")
+    busy = world.receive(patient, body="bukhar kyun aata hai")
+    with world.engine.begin() as conn:
+        # One worker died 20 minutes into a message; another is working right now.
+        conn.execute(
+            text(
+                "UPDATE messages SET status = 'processing', claimed_at = "
+                "CASE WHEN id = :stranded THEN now() - interval '20 minutes' "
+                "ELSE now() END"
+            ),
+            {"stranded": stranded},
+        )
+
+    assert not world.worker.work_one()
+
+    status, error = world.message(stranded)
+    assert status == "failed" and "stopped" in error
+    assert world.message(busy) == ("processing", None)
+    assert world.sent == []
