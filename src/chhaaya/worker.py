@@ -1,5 +1,6 @@
 """The worker: claims stored messages and turns them into replies (design section 3)."""
 
+import functools
 import logging
 import re
 import signal
@@ -195,7 +196,10 @@ def main() -> None:
         settings.whatsapp_access_token, settings.whatsapp_phone_number_id
     )
     sarvam = SarvamClient(settings.sarvam_api_key)
-    cases = Cases(engine, whatsapp, sarvam, bge_m3())
+    # BGE-M3 loads on the first answer to a question, so a danger sign is never
+    # held up by the 2 GB model download.
+    load = functools.cache(bge_m3)
+    cases = Cases(engine, whatsapp, sarvam, lambda texts: load()(texts))
     # The Q&A and document agents register here as they land.
     worker = Worker(engine, whatsapp, sarvam, cases, {"escalation": cases.answer})
     stop = threading.Event()
