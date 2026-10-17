@@ -20,6 +20,7 @@ class World:
         self.sent: list[tuple[str, str]] = []
         self.language: tuple[str, str] | None = ("hi-IN", "Latn")
         self.sarvam_calls = 0
+        self.whatsapp_up = True
         self.agent_calls: list[tuple[str, int]] = []
         http = httpx2.Client(transport=httpx2.MockTransport(self.handle))
         self.agents: dict[str, Callable[[Inbound], None]] = {
@@ -44,6 +45,8 @@ class World:
             return httpx2.Response(
                 200, json={"language_code": language, "script_code": script}
             )
+        if not self.whatsapp_up:
+            return httpx2.Response(401, json={"error": {"message": "token expired"}})
         body = json.loads(request.read())
         self.sent.append((body["to"], body["text"]["body"]))
         return httpx2.Response(200, json={"messages": [{"id": "wamid.out"}]})
@@ -144,6 +147,22 @@ def test_a_danger_sign_gets_an_urgent_reply_and_a_case_even_if_sarvam_is_down(
     assert world.message(message).status == "done"
     assert world.sarvam_calls == 0
     assert world.agent_calls == []
+
+
+def test_the_asha_case_opens_even_when_the_urgent_reply_cannot_be_sent(
+    world: World,
+):
+    world.whatsapp_up = False
+    asha = world.add_user("919999999999", "asha")
+    patient = world.add_user("911111111111", asha=asha)
+    message = world.receive(patient, body="usko jhatke aa rahe hain")
+
+    world.worker.work_one()
+
+    assert world.cases() == [("danger_sign", patient, asha, "open")]
+    status, error = world.message(message)
+    assert status == "failed"
+    assert "401" in error
 
 
 def test_a_danger_sign_from_a_patient_without_an_asha_is_answered_then_failed(
