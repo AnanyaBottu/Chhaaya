@@ -5,7 +5,7 @@ import re
 import signal
 import threading
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from sqlalchemy import Engine, create_engine, text
 
@@ -18,6 +18,13 @@ from chhaaya.whatsapp import WhatsAppClient
 
 log = logging.getLogger("chhaaya.worker")
 DEVANAGARI = re.compile("[\u0900-\u097f]")
+# Sent when a voice note cannot be read, so it is never screened for danger signs.
+VOICE_UNREADABLE = (
+    "We could not understand your voice note. Please type your message. "
+    "If it is an emergency, call 108.\n\n"
+    "Aapka voice note samajh nahi aaya. Kripya likhkar bhejein. "
+    "Emergency ho to 108 par call karein."
+)
 
 # Take the oldest pending message. SKIP LOCKED makes a second worker pass over
 # a message the first is claiming, so no message is processed twice.
@@ -99,11 +106,11 @@ class Worker:
         if message.role == "asha":
             return self.route("escalation", message)
         if message.kind == "audio":
-            raise NotImplementedError("voice notes are not supported yet")
+            message = self.transcribe(message)
         if message.body and (signs := danger_signs.detect(message.body)):
             return self.escalate(message, signs)
         if message.kind == "text":
-            self.store_language(message)
+            message = self.store_language(message)
         self.route("document" if message.kind == "image" else "qa", message)
 
     def route(self, agent: str, message: Inbound) -> None:
@@ -111,13 +118,32 @@ class Worker:
             raise LookupError(f"no {agent} agent is registered")
         self.agents[agent](message)
 
-    def store_language(self, message: Inbound) -> None:
+    def transcribe(self, message: Inbound) -> Inbound:
+        """Turn a voice note into text on the message, or tell the patient to type."""
+        try:
+            audio = self.whatsapp.download_media(message.media_id or "")
+            body, language, script = self.sarvam.transcribe(audio, "audio/ogg")
+        except Exception:
+            self.whatsapp.send_text(message.wa_id, VOICE_UNREADABLE)
+            raise
+        with self.engine.begin() as conn:
+            conn.execute(
+                text("UPDATE messages SET body = :body, language = :l WHERE id = :id"),
+                {"body": body, "l": language, "id": message.id},
+            )
+        return self.save_language(replace(message, body=body), language, script)
+
+    def store_language(self, message: Inbound) -> Inbound:
         language, script = self.sarvam.identify_language(message.body or "")
+        return self.save_language(message, language, script)
+
+    def save_language(self, message: Inbound, language: str, script: str) -> Inbound:
         with self.engine.begin() as conn:
             conn.execute(
                 text("UPDATE users SET language = :l, script = :s WHERE id = :id"),
                 {"l": language, "s": script, "id": message.user_id},
             )
+        return replace(message, language=language, script=script)
 
     def escalate(self, message: Inbound, signs: list[str]) -> None:
         """Reply first, and open the ASHA's case even if the reply fails."""
