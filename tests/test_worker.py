@@ -9,6 +9,7 @@ import pytest
 from sqlalchemy import Engine, text
 from test_audio import tone
 
+from chhaaya.cases import Cases
 from chhaaya.sarvam import SarvamClient
 from chhaaya.whatsapp import WhatsAppClient
 from chhaaya.worker import Inbound, Worker
@@ -20,6 +21,7 @@ class World:
     def __init__(self, engine: Engine):
         self.engine = engine
         self.sent: list[tuple[str, str]] = []
+        self.templates: list[tuple[str, str, list[str]]] = []
         self.voice_notes: list[str] = []
         self.language: tuple[str, str] | None = ("hi-IN", "Latn")
         self.transcript: str | None = None  # None means speech-to-text is down
@@ -31,12 +33,16 @@ class World:
         self.agents: dict[str, Callable[[Inbound], None]] = {
             name: self.agent(name) for name in ("qa", "document", "escalation")
         }
-        self.worker = Worker(
-            engine,
-            WhatsAppClient("token", "123456", http),
-            SarvamClient("key", http),
-            self.agents,
-        )
+        whatsapp = WhatsAppClient("token", "123456", http)
+        sarvam = SarvamClient("key", http)
+        self.embedded: list[str] = []
+        self.cases_ = Cases(engine, whatsapp, sarvam, self.embed)
+        self.worker = Worker(engine, whatsapp, sarvam, self.cases_, self.agents)
+
+    def embed(self, texts):
+        """A stand-in for BGE-M3: one fixed 1024-dimensional vector per text."""
+        self.embedded.extend(texts)
+        return [[1.0] + [0.0] * 1023 for _ in texts]
 
     def agent(self, name: str) -> Callable[[Inbound], None]:
         return lambda message: self.agent_calls.append((name, message.id))
@@ -55,11 +61,31 @@ class World:
         if path.endswith("/media"):
             return httpx2.Response(200, json={"id": "media-up"})
         body = json.loads(request.read())
+        if body["type"] != "template" and not self.in_window(body["to"]):
+            # Meta refuses free-form messages outside the 24-hour window.
+            error = {"code": 131047, "message": "Re-engagement message"}
+            return httpx2.Response(400, json={"error": error})
         if body["type"] == "audio":
             self.voice_notes.append(body["to"])
+        elif body["type"] == "template":
+            template = body["template"]
+            params = [p["text"] for p in template["components"][0]["parameters"]]
+            self.templates.append((body["to"], template["name"], params))
         else:
             self.sent.append((body["to"], body["text"]["body"]))
         return httpx2.Response(200, json={"messages": [{"id": "wamid.out"}]})
+
+    def in_window(self, wa_id: str) -> bool:
+        with self.engine.connect() as conn:
+            return conn.execute(
+                text(
+                    "SELECT EXISTS (SELECT 1 FROM messages m JOIN users u "
+                    "ON u.id = m.user_id WHERE u.wa_id = :wa_id "
+                    "AND m.direction = 'inbound' "
+                    "AND m.created_at > now() - interval '24 hours')"
+                ),
+                {"wa_id": wa_id},
+            ).scalar_one()
 
     def sarvam(self, path: str) -> httpx2.Response:
         if path.endswith("text-to-speech"):
@@ -125,6 +151,9 @@ class World:
                 text("SELECT language, script FROM users WHERE id = :id"),
                 {"id": user_id},
             ).one()
+
+    def texts_to(self, wa_id: str) -> list[str]:
+        return [body for to, body in self.sent if to == wa_id]
 
     def cases(self):
         with self.engine.connect() as conn:

@@ -100,7 +100,7 @@ docker compose exec db psql -U chhaaya -c "SELECT wa_message_id, kind, status FR
 
 ## Worker
 
-The worker turns stored messages into replies. It claims the oldest pending message with `SELECT ... FOR UPDATE SKIP LOCKED`, so two workers never take the same one, and marks it `processing`. Messages from a registered ASHA go straight to the escalation agent. For a patient, the danger-sign check runs first: a match sends the urgent reply in the patient's language and opens a case for their ASHA, without calling Sarvam, so a Sarvam outage cannot delay it. Otherwise typed text goes through Sarvam language identification, which stores the language and script on the user, and then to an agent: photos to the document agent, text to the Q&A agent. A message that raises is marked `failed` with the error kept in `messages.error`; it is never retried. A message still `processing` 10 minutes after its claim lost its worker, and the next claim marks it `failed` with the error "worker stopped before finishing it". Voice notes are transcribed first (see Voice below), and a message fails if its agent is not registered. The agents register in `main()` in `src/chhaaya/worker.py` as they are built, so today every non-danger message fails with "no ... agent is registered". `SARVAM_API_KEY` in `.env` is required. Until the escalation agent lands, the ASHA gets no alert even though the urgent reply says she was told, so do not run the worker against real phones yet.
+The worker turns stored messages into replies. It claims the oldest pending message with `SELECT ... FOR UPDATE SKIP LOCKED`, so two workers never take the same one, and marks it `processing`. Messages from a registered ASHA go straight to the escalation agent. For a patient, the danger-sign check runs first: a match sends the urgent reply in the patient's language and opens a case for their ASHA, without calling Sarvam, so a Sarvam outage cannot delay it. Otherwise typed text goes through Sarvam language identification, which stores the language and script on the user, and then to an agent: photos to the document agent, text to the Q&A agent. A message that raises is marked `failed` with the error kept in `messages.error`; it is never retried. A message still `processing` 10 minutes after its claim lost its worker, and the next claim marks it `failed` with the error "worker stopped before finishing it". Voice notes are transcribed first (see Voice below), and a message fails if its agent is not registered. The agents register in `main()` in `src/chhaaya/worker.py` as they are built, so until the Q&A and document agents land, every other patient message fails with "no ... agent is registered". `SARVAM_API_KEY` in `.env` is required.
 
 ```bash
 docker compose up --build worker
@@ -113,6 +113,21 @@ Patients can send voice notes and get voice notes back. An inbound voice note is
 
 ```bash
 uv run pytest tests/test_audio.py tests/test_voice.py tests/test_worker.py
+```
+
+## Escalation cases
+
+Anything Chhaaya should not answer alone goes to the patient's ASHA as a numbered case: danger signs, questions without strong enough evidence, critical lab values, prescriptions to confirm and missed doses. Opening a case saves it, alerts the ASHA with a summary (the first 500 characters of the details; the case keeps all of them) and tells the patient their ASHA will reply. The patient is not told after a danger sign, because the urgent reply already said so, or outside the 24-hour window, where no approved template carries the notice. The ASHA answers by starting her message with the case number ("12 Give ORS and come to the PHC today"); the answer is relayed to the patient as text and a voice note, and the case closes. If relaying fails the case stays open, and anything without a number gets a short usage hint. Answers to questions are also saved to the knowledge base as `health_worker_answer` chunks, embedded with BGE-M3 like the guidelines (the worker loads the model on the first such answer, not at start), so later answers can cite them as coming from a health worker. Only the answer is stored, not the patient's question, and the ASHA's alert warns that the answer will be shared, so she leaves out names and personal details. A prescription case takes "12 ok" or corrections and is not relayed; the document agent explains the confirmed prescription. Outside WhatsApp's 24-hour window the alert and the relay use templates, which must be created and approved on the Meta app in Hindi (`hi`) and English (`en`):
+
+| Template | Body variables |
+|---|---|
+| `asha_case_alert` | `{{1}}` case number, `{{2}}` what it is about, `{{3}}` patient's number, `{{4}}` details |
+| `case_update` | `{{1}}` the ASHA's answer |
+
+Meta limits a template body to 1024 characters with its variables filled in. Keep the fixed text of `asha_case_alert` under 450 characters so a 500-character summary still fits.
+
+```bash
+uv run pytest tests/test_cases.py
 ```
 
 ## Contributing
