@@ -97,8 +97,8 @@ def test_adversarial_messages_cover_every_category(tmp_path: Path):
     assert any("prompt_injection" in p for p in check_adversarial(path))
 
 
-def documents(tmp_path: Path, broken: bool = False) -> Path:
-    (tmp_path / "documents").mkdir()
+def documents(tmp_path: Path, broken: str = "") -> Path:
+    (tmp_path / "documents").mkdir(parents=True)
     lines = []
     for n in range(20):
         kind = "lab_report" if n < 10 else "prescription"
@@ -118,8 +118,12 @@ def documents(tmp_path: Path, broken: bool = False) -> Path:
                      "duration": "30 days"}
                 ]
             }  # fmt: skip
-        if broken and n == 3:
+        if broken == "unit" and n == 3:
             del expected["tests"][0]["unit"]
+        if broken == "value" and n == 3:
+            expected["tests"][0]["value"] = "9.1"
+        if broken == "kind" and n == 3:
+            kind = "lab-report"
         lines.append(json.dumps({"id": str(n), "kind": kind, "file": file,
                                  "expected": expected}))  # fmt: skip
     path = tmp_path / "documents.jsonl"
@@ -135,7 +139,14 @@ def test_documents_need_ten_of_each_kind_with_their_fields_and_files(tmp_path: P
 
 
 def test_a_lab_test_without_a_unit_fails(tmp_path: Path):
-    assert any("unit" in p for p in check_documents(documents(tmp_path, broken=True)))
+    assert any("unit" in p for p in check_documents(documents(tmp_path, "unit")))
+
+
+def test_a_lab_value_must_be_a_number_and_the_kind_known(tmp_path: Path):
+    problems = check_documents(documents(tmp_path / "value", "value"))
+    assert any("3" in p and "value" in p for p in problems)
+    problems = check_documents(documents(tmp_path / "kind", "kind"))
+    assert any("lab-report" in p for p in problems)
 
 
 def test_voice_needs_fifteen_recordings_per_language_with_transcripts(tmp_path: Path):
@@ -165,8 +176,6 @@ def test_ratings_accept_only_yes_or_no(tmp_path: Path):
     assert any("maybe" in p for p in check_ratings(path))
 
 
-def test_the_committed_files_have_the_expected_columns():
+def test_every_committed_set_passes_its_checks():
     for name, check in eval_sets.CHECKS.items():
-        path = eval_sets.SETS / name
-        assert path.exists(), path
-        assert not [p for p in check(path) if "column" in p], name
+        assert check(eval_sets.SETS / name) == [], name
