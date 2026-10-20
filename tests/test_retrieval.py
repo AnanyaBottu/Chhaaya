@@ -1,4 +1,6 @@
 import json
+import math
+import random
 import re
 import statistics
 import time
@@ -6,10 +8,10 @@ from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
-from sqlalchemy import Engine, func, insert, select
+from sqlalchemy import Engine, create_engine, func, insert, select
 
 from chhaaya.corpus import CHUNKS, read_sources
-from chhaaya.db import EMBEDDING_DIMENSIONS, KbChunk
+from chhaaya.db import EMBEDDING_DIMENSIONS, KbChunk, sqlalchemy_url
 from chhaaya.retrieval import KnowledgeBase, bge_m3
 
 # Stands in for BGE-M3, which is a 2 GB download: each known word is one axis.
@@ -229,3 +231,69 @@ def test_hand_written_questions_find_their_document_in_the_top_5(engine: Engine)
         f"{max(latencies) * 1000:.0f} ms"
     )
     assert misses == []
+
+
+def test_unapproved_answers_nearer_than_the_index_looks_do_not_hide_guidelines(
+    database_url: str, engine: Engine
+):
+    rng = random.Random(0)
+    query = fake_embed(["ors"])[0]
+
+    def near_query(spread: float) -> list[float]:
+        return [x + rng.gauss(0, spread) for x in query[:32]] + query[32:]
+
+    guidelines = {f"guideline {n}": near_query(1.0) for n in range(6)}
+    with engine.begin() as conn:
+        conn.execute(
+            insert(KbChunk),
+            [
+                {
+                    "text": guideline,
+                    "title": "Guideline",
+                    "publisher": "MoHFW",
+                    "year": 2019,
+                    "page": 1,
+                    "url": "https://example.org/guideline.pdf",
+                    "source_type": "guideline",
+                    "embedding": embedding,
+                }
+                for guideline, embedding in guidelines.items()
+            ],
+        )
+        conn.execute(
+            insert(KbChunk),
+            [
+                {
+                    "text": f"unapproved answer {n}",
+                    "title": "Answered by a health worker",
+                    "source_type": "health_worker_answer",
+                    "embedding": near_query(0.1),
+                }
+                for n in range(200)  # far more than hnsw.ef_search, 40 by default
+            ],
+        )
+    # Force the HNSW index, which the planner skips for a table this small.
+    forced = create_engine(
+        sqlalchemy_url(database_url),
+        connect_args={"options": "-c enable_seqscan=off"},
+    )
+    with forced.connect() as conn:
+        plan = conn.exec_driver_sql(
+            "EXPLAIN SELECT id FROM kb_chunks ORDER BY embedding <=> %s LIMIT 5",
+            (str(query),),
+        ).scalars()
+        assert "ix_kb_chunks_embedding" in "\n".join(plan)
+
+    hits = KnowledgeBase(forced, fake_embed).search("ors")
+    forced.dispose()
+
+    def similarity(vector: list[float]) -> float:
+        dot = sum(a * b for a, b in zip(vector, query, strict=True))
+        return (
+            dot
+            / math.dist(vector, [0.0] * len(vector))
+            / math.dist(query, [0.0] * len(query))
+        )
+
+    nearest = sorted(guidelines, key=lambda g: similarity(guidelines[g]), reverse=True)
+    assert [hit.text for hit in hits] == nearest[:5]
