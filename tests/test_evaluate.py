@@ -82,11 +82,21 @@ QUERIES: dict[str, str | list[str]] = {
     "ors aur iron ke baare mein": ["ors iron", "ors preparation"],
     "ors kaise banaen": "ors preparation",
     "ors kaise banaye": "ors preparation",
+    "ors aur iron": "ors iron",
     "bachcha akad raha hai": "convulsions",
     "can i take double iron tablet": "iron tablet dose",
     "baby has tez bukhar and jhatke": "fever convulsions",
     "khoon ki jaanch karwani hai": "blood test",
     "who will win the match": "cricket",
+}
+
+
+# What speech to text hears in each recording: the second and third differ from the
+# typed question in their outcome or their cause.
+TRANSCRIPTS = {
+    b"ogg": "ors kaise banaye",
+    b"ogg below tau": "ors aur iron",
+    b"ogg with fits": "ors aur iron baby has fits",
 }
 
 
@@ -126,7 +136,7 @@ class FakeSarvam:
         return "Haemoglobin 6.5 g/dL 12 - 15"
 
     def transcribe(self, audio: bytes, mime_type: str) -> tuple[str, str | None, str]:
-        return "ors kaise banaye", "hi", "Latn"
+        return TRANSCRIPTS[audio], "hi", "Latn"
 
     def synthesize(self, text: str, language: str) -> bytes:
         raise AssertionError("the evaluation must not pay to speak answers")
@@ -187,12 +197,15 @@ def test_run_scores_every_set_per_language_and_writes_the_report(
         )
         + "\n"
     )
-    (sets / "voice" / "1.ogg").write_bytes(b"ogg")
+    for n, audio in enumerate(TRANSCRIPTS, 1):
+        (sets / "voice" / f"{n}.ogg").write_bytes(audio)
     write(
         sets / "voice.csv",
         ["id", "language", "file", "transcript"],
         [
             [1, "hinglish", "voice/1.ogg", "ors kaise banaen"],
+            [2, "hinglish", "voice/2.ogg", "ors kaise banaen"],
+            [3, "en", "voice/3.ogg", "ors aur iron ke baare mein"],
         ],
     )
     write(
@@ -266,9 +279,10 @@ def test_run_scores_every_set_per_language_and_writes_the_report(
     assert (
         "| lab_report | 4/4 |" in report and "| 1/1 | 0 |" in report
     )  # fields, critical
-    assert (
-        "| hinglish | 1 | 3 | 33.3% | 1/1 |" in report
-    )  # word error rate, same answer
+    # Word error rate, then same answer: the second hinglish recording scores below τ
+    # and the English one names a danger sign, so neither gets the typed answer.
+    assert "| hinglish | 3 | 6 | 50.0% | 1/2 |" in report
+    assert "| en | 3 | 6 | 50.0% | 0/1 |" in report
     assert (results / "documents.csv").exists() and (results / "voice.csv").exists()
 
 
