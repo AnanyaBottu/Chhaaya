@@ -79,4 +79,4 @@ Apply every item a change touches:
 - Work is claimed with `SELECT ... FOR UPDATE SKIP LOCKED`; there is no Redis or Celery.
 - Every Sarvam call goes through the single client module.
 - Every row in the danger-sign list, lexicon and critical-value files cites its source.
-- Intent and evaluation test sets are human-written and never used for training or choosing thresholds. Metrics are reported per language.
+- The intent test set is human-written. An evaluation set may be drafted with an LLM only if a person reads and approves every row before results are reported. Neither is used for training, and only the `tune` half of the questions chooses a threshold (τ). Metrics are reported per language.

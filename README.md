@@ -164,6 +164,14 @@ The router that sends each message to the Q&A or reminder agent is trained on la
 uv run python -m chhaaya.intent_data data/intent/agreement/Ananya.csv data/intent/agreement/Arham.csv
 ```
 
+## Evaluation sets
+
+The sets that the evaluation harness runs against the system live in `eval/sets/`: 40 patient questions written in Hindi, English and Hinglish with the source document that answers each, split into a half that tunes τ and a half that reports it; 30 danger-sign messages and 30 look-alikes; 20 adversarial messages; 10 synthetic lab reports and 10 prescriptions with their expected fields; 15 recorded voice questions per language with transcripts; and the sheet where two people rate answers. The question, danger-sign, adversarial and document sets were drafted with an LLM, and a person read and approved every row. People recorded the voice questions and rate the answers. None of the sets is used for training. [docs/evaluation-sets.md](docs/evaluation-sets.md) explains how to write each one, and the command below checks every file and lists what is still missing.
+
+```bash
+uv run python -m chhaaya.eval_sets
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [AGENTS.md](AGENTS.md) for the rules every change and coding agent follows.

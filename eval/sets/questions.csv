@@ -1,0 +1,121 @@
+question_id,language,text,expected_source,split
+1,en,how long should i give only breast milk to my baby,hbyc_asha_handbook,tune
+1,hi,बच्चे को कितने महीने तक सिर्फ माँ का दूध देना है,hbyc_asha_handbook,tune
+1,hinglish,baby ko kitne mahine tak sirf maa ka doodh dena hai,hbyc_asha_handbook,tune
+2,en,when can i start giving khana to my baby other than milk,hbyc_asha_handbook,report
+2,hi,बच्चे को दूध के अलावा खाना कब से शुरू करें,hbyc_asha_handbook,report
+2,hinglish,bachche ko doodh ke alawa khana kab se shuru kare,hbyc_asha_handbook,report
+3,en,why do they give zinc tablet when child has loose motion,hbyc_asha_handbook,tune
+3,hi,दस्त में बच्चे को जिंक की गोली क्यों देते हैं,hbyc_asha_handbook,tune
+3,hinglish,loose motion me bachche ko zinc ki goli kyu dete hai,hbyc_asha_handbook,tune
+4,en,what food can i make for my 8 month old,hbyc_asha_handbook,report
+4,hi,आठ महीने के बच्चे को खाने में क्या दें,hbyc_asha_handbook,report
+4,hinglish,8 mahine ke bachche ko khane me kya de,hbyc_asha_handbook,report
+5,en,how often should my babys weight be checked,hbyc_asha_handbook,tune
+5,hi,बच्चे का वजन कितने समय में तुलवाना चाहिए,hbyc_asha_handbook,tune
+5,hinglish,bachche ka weight kitne time me check karwana chahiye,hbyc_asha_handbook,tune
+6,en,how do i keep my newborn baby warm,asha_module_6,report
+6,hi,नवजात बच्चे को गरम कैसे रखें,asha_module_6,report
+6,hinglish,newborn baby ko garam kaise rakhe,asha_module_6,report
+7,en,should the baby be given the first yellow milk,asha_module_6,tune
+7,hi,क्या बच्चे को पहला पीला गाढ़ा दूध पिलाना चाहिए,asha_module_6,tune
+7,hinglish,kya baby ko pehla peela gaadha doodh pilana chahiye,asha_module_6,tune
+8,en,when can i give my newborn a bath,asha_module_6,report
+8,hi,नवजात को पहली बार कब नहलाना चाहिए,asha_module_6,report
+8,hinglish,newborn ko pehli baar kab nehlana chahiye,asha_module_6,report
+9,en,how many times do i need to go for checkup during pregnancy,asha_module_6,tune
+9,hi,गर्भावस्था में कितनी बार जांच करवानी होती है,asha_module_6,tune
+9,hinglish,pregnancy me kitni baar checkup karwana hota hai,asha_module_6,tune
+10,en,my baby was born very small what care is needed at home,asha_module_6,report
+10,hi,बच्चा बहुत कम वजन का पैदा हुआ है घर पर कैसे देखभाल करें,asha_module_6,report
+10,hinglish,baby bahut kam weight ka paida hua hai ghar pe kaise dekhbhal kare,asha_module_6,report
+11,en,how to know if my childs cough is serious,asha_module_7,tune
+11,hi,बच्चे की खांसी गंभीर है यह कैसे पता करें,asha_module_7,tune
+11,hinglish,bachche ki khansi serious hai ye kaise pata kare,asha_module_7,tune
+12,en,what should i feed my child when he is sick,asha_module_7,report
+12,hi,बीमारी में बच्चे को क्या खिलाना चाहिए,asha_module_7,report
+12,hinglish,bimari me bachche ko kya khilana chahiye,asha_module_7,report
+13,en,child has fever what to do at home,asha_module_7,tune
+13,hi,बच्चे को बुखार है घर पर क्या करें,asha_module_7,tune
+13,hinglish,bachche ko bukhar hai ghar pe kya kare,asha_module_7,tune
+14,en,my child is very thin and not gaining weight,asha_module_7,report
+14,hi,मेरा बच्चा बहुत दुबला है और वजन नहीं बढ़ रहा,asha_module_7,report
+14,hinglish,mera bachcha bahut patla hai aur weight nahi badh raha,asha_module_7,report
+15,en,how many iron tablets do i have to take in pregnancy,sba_guidelines,tune
+15,hi,गर्भावस्था में आयरन की कितनी गोलियाँ खानी हैं,sba_guidelines,tune
+15,hinglish,pregnancy me iron ki kitni goliyan khani hai,sba_guidelines,tune
+16,en,after iron tablets my potty is black is that ok,sba_guidelines,report
+16,hi,आयरन की गोली खाने से टट्टी काली आ रही है क्या ये ठीक है,sba_guidelines,report
+16,hinglish,iron ki goli se potty kaali aa rahi hai kya ye theek hai,sba_guidelines,report
+17,en,which tests are done at pregnancy checkup,sba_guidelines,tune
+17,hi,गर्भावस्था की जांच में कौन से टेस्ट होते हैं,sba_guidelines,tune
+17,hinglish,pregnancy checkup me kaun se test hote hai,sba_guidelines,tune
+18,en,when should i get my pregnancy registered,sba_guidelines,report
+18,hi,गर्भावस्था का पंजीकरण कब तक करवाना चाहिए,sba_guidelines,report
+18,hinglish,pregnancy ka registration kab tak karwana chahiye,sba_guidelines,report
+19,en,is tetanus injection needed in pregnancy,sba_guidelines,tune
+19,hi,क्या गर्भावस्था में टिटनेस का टीका लगवाना जरूरी है,sba_guidelines,tune
+19,hinglish,kya pregnancy me tetanus ka injection lagwana zaroori hai,sba_guidelines,tune
+20,en,can i take iron tablet with tea or milk,sba_guidelines,report
+20,hi,क्या आयरन की गोली चाय या दूध के साथ ले सकते हैं,sba_guidelines,report
+20,hinglish,iron ki goli chai ya doodh ke saath le sakte hai kya,sba_guidelines,report
+21,en,where can i get ors made for my child,idcf_guidelines,tune
+21,hi,बच्चे के लिए ओआरएस का घोल कहाँ मिलेगा,idcf_guidelines,tune
+21,hinglish,bachche ke liye ors ka ghol kaha milega,idcf_guidelines,tune
+22,en,how many days does loose motion last normally,idcf_guidelines,report
+22,hi,सामान्य दस्त कितने दिन तक रहते हैं,idcf_guidelines,report
+22,hinglish,normal loose motion kitne din tak rehte hai,idcf_guidelines,report
+23,en,does asha didi give ors packets at home,idcf_guidelines,tune
+23,hi,क्या आशा दीदी घर पर ओआरएस के पैकेट देती हैं,idcf_guidelines,tune
+23,hinglish,kya asha didi ghar pe ors ke packet deti hai,idcf_guidelines,tune
+24,en,when is bcg vaccine given,immunization_handbook,report
+24,hi,बीसीजी का टीका कब लगता है,immunization_handbook,report
+24,hinglish,bcg ka teeka kab lagta hai,immunization_handbook,report
+25,en,baby got fever after vaccine is it normal,immunization_handbook,tune
+25,hi,टीके के बाद बच्चे को बुखार आ गया क्या ये सामान्य है,immunization_handbook,tune
+25,hinglish,teeke ke baad baby ko bukhar aa gaya kya ye normal hai,immunization_handbook,tune
+26,en,at what age is measles vaccine given,immunization_handbook,report
+26,hi,खसरे का टीका किस उम्र में लगता है,immunization_handbook,report
+26,hinglish,khasre ka teeka kis umar me lagta hai,immunization_handbook,report
+27,en,is there a second dose of measles rubella vaccine,immunization_handbook,tune
+27,hi,क्या खसरा रूबेला का दूसरा टीका भी लगता है,immunization_handbook,tune
+27,hinglish,measles rubella ka doosra teeka bhi lagta hai kya,immunization_handbook,tune
+28,en,which diseases does pentavalent vaccine protect from,immunization_handbook,report
+28,hi,पेंटावेलेंट टीका किन बीमारियों से बचाता है,immunization_handbook,report
+28,hinglish,pentavalent teeka kin bimariyon se bachata hai,immunization_handbook,report
+29,en,from what age should i get my bp and sugar checked,np_ncd_guidelines,tune
+29,hi,किस उम्र से बीपी और शुगर की जांच करवानी चाहिए,np_ncd_guidelines,tune
+29,hinglish,kis umar se bp aur sugar ki jaanch karwani chahiye,np_ncd_guidelines,tune
+30,en,how can i avoid getting sugar disease,np_ncd_guidelines,report
+30,hi,शुगर की बीमारी से कैसे बचें,np_ncd_guidelines,report
+30,hinglish,sugar ki bimari se kaise bache,np_ncd_guidelines,report
+31,en,does gutka and smoking cause bp problems,np_ncd_guidelines,tune
+31,hi,क्या गुटखा और बीड़ी से बीपी की बीमारी होती है,np_ncd_guidelines,tune
+31,hinglish,kya gutka aur beedi se bp ki bimari hoti hai,np_ncd_guidelines,tune
+32,en,my husband has tb should the rest of us take medicine,tb_preventive_treatment,report
+32,hi,पति को टीबी है क्या घर के बाकी लोगों को भी दवा लेनी है,tb_preventive_treatment,report
+32,hinglish,husband ko tb hai kya ghar ke baaki logo ko bhi dawai leni hai,tb_preventive_treatment,report
+33,en,what is the 3hp tb medicine course,tb_preventive_treatment,tune
+33,hi,टीबी से बचाव की 3HP दवा क्या है,tb_preventive_treatment,tune
+33,hinglish,tb se bachne ki 3hp dawai kya hoti hai,tb_preventive_treatment,tune
+34,en,what side effects can tb prevention medicine have,tb_preventive_treatment,report
+34,hi,टीबी से बचाव की दवा के क्या दुष्प्रभाव हो सकते हैं,tb_preventive_treatment,report
+34,hinglish,tb se bachav wali dawai ke side effect kya ho sakte hai,tb_preventive_treatment,report
+35,en,how often should hba1c test be done for sugar,icmr_stw_diabetes_type_2,tune
+35,hi,शुगर में एचबीए1सी की जांच कितने समय में करवानी चाहिए,icmr_stw_diabetes_type_2,tune
+35,hinglish,sugar me hba1c test kitne time me karwana chahiye,icmr_stw_diabetes_type_2,tune
+36,en,what are the signs of high sugar,icmr_stw_diabetes_type_2,report
+36,hi,शुगर बढ़ने के क्या लक्षण होते हैं,icmr_stw_diabetes_type_2,report
+36,hinglish,sugar badhne ke kya lakshan hote hai,icmr_stw_diabetes_type_2,report
+37,en,how much salt can i eat in a day with bp,icmr_stw_hypertension,tune
+37,hi,बीपी में दिन भर में कितना नमक खा सकते हैं,icmr_stw_hypertension,tune
+37,hinglish,bp me din bhar me kitna namak kha sakte hai,icmr_stw_hypertension,tune
+38,en,how much walking or exercise is good for bp,icmr_stw_hypertension,report
+38,hi,बीपी के लिए रोज कितना चलना या व्यायाम करना चाहिए,icmr_stw_hypertension,report
+38,hinglish,bp ke liye roz kitna chalna ya exercise karna chahiye,icmr_stw_hypertension,report
+39,en,child has loose motion when should i take him back to hospital,icmr_stw_diarrhoea_children,tune
+39,hi,बच्चे को दस्त हैं कब वापस अस्पताल ले जाना चाहिए,icmr_stw_diarrhoea_children,tune
+39,hinglish,bachche ko loose motion hai kab wapas hospital le jana chahiye,icmr_stw_diarrhoea_children,tune
+40,en,when does a child with fever need to be admitted,icmr_stw_fever_children,report
+40,hi,बुखार वाले बच्चे को अस्पताल में भर्ती कब करना पड़ता है,icmr_stw_fever_children,report
+40,hinglish,bukhar wale bachche ko hospital me admit kab karna padta hai,icmr_stw_fever_children,report
