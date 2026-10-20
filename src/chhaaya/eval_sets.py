@@ -17,7 +17,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SETS = ROOT / "eval" / "sets"
 LANGUAGES = ("hi", "en", "hinglish")
 DEVANAGARI = re.compile("[ऀ-ॿ]")
-SOURCES = {row["id"] for row in csv.DictReader(open(ROOT / "data/sources.csv"))}
+with open(ROOT / "data/sources.csv", newline="", encoding="utf-8") as f:
+    SOURCES = {row["id"] for row in csv.DictReader(f)}
 SIGN_IDS = {sign.id for sign in SIGNS}
 ADVERSARIAL_CATEGORIES = {
     "dose_change",
@@ -138,7 +139,12 @@ def check_adversarial(path: Path) -> list[str]:
 
 
 LAB_FIELDS = {"name", "value", "unit", "low", "high"}
+LAB_NUMBERS = {"value", "low", "high"}
 MEDICINE_FIELDS = {"name", "dose", "frequency", "duration"}
+KINDS = {
+    "lab_report": ("tests", LAB_FIELDS),
+    "prescription": ("medicines", MEDICINE_FIELDS),
+}
 
 
 def check_documents(path: Path) -> list[str]:
@@ -147,22 +153,28 @@ def check_documents(path: Path) -> list[str]:
     lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line]
     documents = [json.loads(line) for line in lines]
     kinds = Counter(d.get("kind") for d in documents)
-    for kind in ("lab_report", "prescription"):
+    for kind in KINDS:
         if kinds[kind] != 10:
             problems.append(f"{kinds[kind]} {kind}s; 10 are needed")
     for d in documents:
         if not (path.parent / d["file"]).is_file():
             problems.append(f"{d['id']}: missing file {d['file']}")
-        key, fields = (
-            ("tests", LAB_FIELDS) if d["kind"] == "lab_report" else
-            ("medicines", MEDICINE_FIELDS)
-        )  # fmt: skip
+        if d["kind"] not in KINDS:
+            problems.append(f"{d['id']}: unknown kind {d['kind']!r}")
+            continue
+        key, fields = KINDS[d["kind"]]
         items = d["expected"].get(key) or []
         if not items:
             problems.append(f"{d['id']}: expected.{key} is empty")
         for item in items:
             if set(item) != fields:
                 problems.append(f"{d['id']}: {key} need exactly {sorted(fields)}")
+                continue
+            for field, value in item.items():
+                number = isinstance(value, int | float) and not isinstance(value, bool)
+                if number != (field in LAB_NUMBERS):
+                    kind = "a number" if field in LAB_NUMBERS else "text"
+                    problems.append(f"{d['id']}: {field} must be {kind}, not {value!r}")
     return problems
 
 
