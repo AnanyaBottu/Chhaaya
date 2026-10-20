@@ -264,8 +264,9 @@ class Cases:
                 self.whatsapp.send_text(message.wa_id, NOT_OPEN.format(number=number))
                 return
             if case.cause in QUESTION_CAUSES:
-                # Later patients may be shown the answer, so it is stored alone;
-                # the question only shapes the embedding that finds it.
+                # Later patients may be shown the answer, so it is stored alone
+                # and unapproved (see review.py); the question only shapes the
+                # embedding that finds it.
                 conn.execute(
                     insert(KbChunk).values(
                         text=reply,

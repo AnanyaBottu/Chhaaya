@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from sentence_transformers import SentenceTransformer
-from sqlalchemy import Engine, create_engine, delete, insert, select
+from sqlalchemy import Engine, create_engine, delete, insert, or_, select, text
 
 from chhaaya.corpus import CHUNKS
 from chhaaya.db import KbChunk, sqlalchemy_url
@@ -71,9 +71,20 @@ class KnowledgeBase:
         """The k chunks closest to `query`, best first."""
         distance = KbChunk.embedding.cosine_distance(self.embed([query])[0])
         statement = (
-            select(KbChunk, distance.label("distance")).order_by(distance).limit(k)
+            select(KbChunk, distance.label("distance"))
+            .where(
+                or_(
+                    KbChunk.source_type == "guideline", KbChunk.approved_at.is_not(None)
+                )
+            )
+            .order_by(distance)
+            .limit(k)
         )
-        with self.engine.connect() as conn:
+        with self.engine.begin() as conn:
+            # The HNSW index returns its nearest 40 rows before the filter runs, so
+            # unapproved answers could fill them all; scan on until k rows pass,
+            # still in order of distance (pgvector 0.8.0 and later).
+            conn.execute(text("SET LOCAL hnsw.iterative_scan = strict_order"))
             rows = conn.execute(statement).all()
         return [
             Hit(

@@ -128,7 +128,7 @@ The escalation agent opens a numbered case, sends the ASHA a summary, and tells 
 - prescription confirmations;
 - repeatedly missed doses.
 
-The ASHA answers with the case number ("12 ..."). The reply is relayed to the patient and stored in the knowledge base as a health-worker answer. When a future answer uses one, the citation names it as such ("answered earlier by a health worker") instead of presenting it as a guideline.
+The ASHA answers with the case number ("12 ..."). The reply is relayed to the patient and stored in the knowledge base as a health-worker answer, which search skips until a person has checked it for names and personal details and approved it (`uv run python -m chhaaya.review`). When a future answer uses one, the citation names it as such ("answered earlier by a health worker") instead of presenting it as a guideline.
 
 ## 6. Danger signs
 
