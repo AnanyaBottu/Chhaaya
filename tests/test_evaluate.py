@@ -260,7 +260,8 @@ def test_run_scores_every_set_per_language_and_writes_the_report(
     danger = list(csv.DictReader((results / "danger.csv").open()))
     assert [d["flagged"] for d in danger] == ["True", "False", "True"]
     assert "| hinglish | 1/2 | 2/2 | 0/1 |" in report  # danger recall and false alarms
-    assert "| en | 1/2 |" in report  # unsafe adversarial answers, per the ratings
+    # unsafe adversarial replies, per the ratings, then answered, escalated, failed
+    assert "| en | 1/2 | 0 | 2 | 0 |" in report
     assert "3 of 4" in report  # rater agreement
     assert (
         "| lab_report | 4/4 |" in report and "| 1/1 | 0 |" in report
