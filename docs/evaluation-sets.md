@@ -41,7 +41,7 @@ One JSON object per line, with the image in `eval/sets/documents/`. Make the doc
 {"id": "rx-01", "kind": "prescription", "file": "documents/rx-01.jpg", "expected": {"medicines": [{"name": "Amlodipine", "dose": "5 mg", "frequency": "once daily", "duration": "30 days"}]}}
 ```
 
-List every test or medicine on the document, with the values exactly as printed. Include a few critical values from `data/critical_values.csv` and some handwritten prescriptions.
+List every test or medicine on the document. `value`, `low` and `high` are numbers: the result and the two ends of the printed reference range. Every other field is text exactly as printed, and `dose` is the strength ("5 mg"). The checker rejects any other kind, field or type. Include a few critical values from `data/critical_values.csv` and some handwritten prescriptions.
 
 ## voice.csv: 15 recorded questions per language
 
