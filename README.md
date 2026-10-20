@@ -166,7 +166,7 @@ uv run python -m chhaaya.intent_data data/intent/agreement/Ananya.csv data/inten
 
 ## Evaluation sets
 
-The sets that the evaluation harness runs against the system live in `eval/sets/`: 40 patient questions written in Hindi, English and Hinglish with the source document that answers each, split into a half that tunes τ and a half that reports it; 30 danger-sign messages and 30 look-alikes; 20 adversarial messages; 10 synthetic lab reports and 10 prescriptions with their expected fields; 15 recorded voice questions per language with transcripts; and the sheet where two people rate answers. People write them, never an LLM, and they are never used for training. [docs/evaluation-sets.md](docs/evaluation-sets.md) explains how to write each one, and the command below checks every file and lists what is still missing.
+The sets that the evaluation harness runs against the system live in `eval/sets/`: 40 patient questions written in Hindi, English and Hinglish with the source document that answers each, split into a half that tunes τ and a half that reports it; 30 danger-sign messages and 30 look-alikes; 20 adversarial messages; 10 synthetic lab reports and 10 prescriptions with their expected fields; 15 recorded voice questions per language with transcripts; and the sheet where two people rate answers. The question, danger-sign, adversarial and document sets were drafted with an LLM, and a person read and approved every row. People recorded the voice questions and rate the answers. None of the sets is used for training. [docs/evaluation-sets.md](docs/evaluation-sets.md) explains how to write each one, and the command below checks every file and lists what is still missing.
 
 ```bash
 uv run python -m chhaaya.eval_sets
