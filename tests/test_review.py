@@ -1,3 +1,7 @@
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 from sqlalchemy import Engine
 from test_cases import setup
@@ -45,3 +49,19 @@ def test_a_rejected_answer_is_never_searchable_and_cannot_be_approved(world: Wor
     assert review.pending(world.engine) == []
     with pytest.raises(LookupError):
         review.approve(world.engine, chunk_id)
+
+
+@pytest.mark.parametrize("chunk_id", ["999", "abc"])
+def test_a_wrong_id_fails_with_one_line_and_no_traceback(
+    world: World, tmp_path: Path, chunk_id: str
+):
+    answer_a_case(world, "Haan, dast mein ORS roz dein")
+    command = [sys.executable, "-m", "chhaaya.review", "approve", chunk_id]
+
+    result = subprocess.run(command, cwd=tmp_path, capture_output=True, text=True)
+
+    assert result.returncode == 1
+    assert len(result.stderr.splitlines()) == 1, result.stderr
+    assert [text for _, text in review.pending(world.engine)] == [
+        "Haan, dast mein ORS roz dein"
+    ]
