@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import Engine, insert
+from sqlalchemy import Engine, func, insert
 from test_retrieval import fake_embed
 from test_worker import World
 
@@ -65,6 +65,7 @@ def test_a_hinglish_question_gets_a_cited_answer_in_text_and_voice(world: World)
         "ORS ghar par bhi ban sakta hai: ek litre paani, chini aur namak",
         title="Answered by a health worker",
         source_type="health_worker_answer",
+        approved_at=func.now(),
     )
 
     message = ask(

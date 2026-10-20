@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from sentence_transformers import SentenceTransformer
-from sqlalchemy import Engine, create_engine, delete, insert, select
+from sqlalchemy import Engine, create_engine, delete, insert, or_, select
 
 from chhaaya.corpus import CHUNKS
 from chhaaya.db import KbChunk, sqlalchemy_url
@@ -71,7 +71,14 @@ class KnowledgeBase:
         """The k chunks closest to `query`, best first."""
         distance = KbChunk.embedding.cosine_distance(self.embed([query])[0])
         statement = (
-            select(KbChunk, distance.label("distance")).order_by(distance).limit(k)
+            select(KbChunk, distance.label("distance"))
+            .where(
+                or_(
+                    KbChunk.source_type == "guideline", KbChunk.approved_at.is_not(None)
+                )
+            )
+            .order_by(distance)
+            .limit(k)
         )
         with self.engine.connect() as conn:
             rows = conn.execute(statement).all()

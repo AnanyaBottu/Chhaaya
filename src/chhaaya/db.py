@@ -224,6 +224,8 @@ class KbChunk(Base):
     source_type: Mapped[str]
     embedding: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIMENSIONS))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    # When a person approved an ASHA's answer; search skips one not yet approved.
+    approved_at: Mapped[datetime | None]
 
     __table_args__ = (
         CheckConstraint(
