@@ -1,6 +1,6 @@
 # Writing the evaluation sets
 
-The project's results rest on these sets (design section 9), so people write them, not an LLM, and nothing in them is ever used for training, prompt tuning or choosing thresholds, except the `tune` half of the questions, which tunes τ. Everything is synthetic: no real patient, name, phone number or report. Every file lives in `eval/sets/`; `uv run python -m chhaaya.eval_sets` says what each one still needs.
+The project's results rest on these sets (design section 9), so a person reads every row and corrects it before results are reported; the question, danger-sign, adversarial and document sets were drafted with an LLM, while the voice recordings and ratings come from people. Nothing in them is ever used for training, prompt tuning or choosing thresholds, except the `tune` half of the questions, which tunes τ. Everything is synthetic: no real patient, name, phone number or report. Every file lives in `eval/sets/`; `uv run python -m chhaaya.eval_sets` says what each one still needs.
 
 Languages are `hi` (Hindi in Devanagari), `en` (English) and `hinglish` (Hindi in the Latin script, mixed with English). Write the way patients text: short, informal, with the spellings people really use ("bp ki goli", "sugar", "loose motion"). Do not put commas inside a CSV field unless the field is quoted. The examples below show the format only; do not copy them into the sets.
 
