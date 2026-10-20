@@ -49,10 +49,13 @@ def main() -> None:
         case []:
             for chunk_id, text in pending(engine):
                 print(f"{chunk_id}: {text}")
-        case ["approve", chunk_id]:
-            approve(engine, int(chunk_id))
-        case ["reject", chunk_id]:
-            reject(engine, int(chunk_id))
+        case ["approve" | "reject" as decision, chunk_id]:
+            if not chunk_id.isdigit():
+                sys.exit(f"{chunk_id!r} is not an answer id")
+            try:
+                {"approve": approve, "reject": reject}[decision](engine, int(chunk_id))
+            except LookupError as error:  # an operator's typo, not a crash
+                sys.exit(str(error))
         case _:
             sys.exit(__doc__)
 
